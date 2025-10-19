@@ -1,0 +1,90 @@
+import streamlit as st
+
+def show():
+    st.markdown("## Bienvenue chez Greentech Solutions")
+    
+    # Présentation
+    st.markdown("""
+    <div class="info-card">
+        <h3>🌿 Qui sommes-nous ?</h3>
+        <p>Greentech Solutions est votre partenaire de confiance pour la transition énergétique. 
+        Nous vous accompagnons dans l'optimisation de votre performance énergétique et la réduction 
+        de votre empreinte carbone.</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div class="info-card">
+            <h3>💡 Nos Services</h3>
+            <ul>
+                <li>Audit énergétique DPE</li>
+                <li>Simulation de performance</li>
+                <li>Conseil en rénovation énergétique</li>
+                <li>Suivi et optimisation énergétique</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class="info-card">
+            <h3>🎯 Notre Mission</h3>
+            <p>Rendre l'efficacité énergétique accessible à tous et contribuer 
+            à un avenir plus durable pour les générations futures.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="info-card">
+            <h3>📞 Contactez-nous</h3>
+            <p>
+            <strong>Adresse :</strong><br>
+            123 Avenue de l'Énergie Verte<br>
+            69500 Bron, France<br><br>
+            
+            <strong>Téléphone :</strong><br>
+            +33 4 78 12 34 56<br><br>
+            
+            <strong>Email :</strong><br>
+            contact@greentech-solutions.fr<br>
+            info@greentech-solutions.fr<br><br>
+            
+            <strong>Horaires :</strong><br>
+            Lundi - Vendredi : 9h - 18h<br>
+            Samedi : 9h - 12h
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class="info-card">
+            <h3>🌍 Nos Engagements</h3>
+            <ul>
+                <li>Neutralité carbone 2030</li>
+                <li>100% énergies renouvelables</li>
+                <li>Transparence totale</li>
+                <li>Innovation continue</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Section stats rapides
+    st.markdown("---")
+    st.markdown("### 📈 Nos Résultats en Chiffres")
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.metric("Clients Satisfaits", "500+", "+15%")
+    
+    with col2:
+        st.metric("Audits Réalisés", "1,200", "+23%")
+    
+    with col3:
+        st.metric("CO2 Économisé", "850 tonnes", "+18%")
+    
+    with col4:
+        st.metric("Années d'Expérience", "12 ans", "")
