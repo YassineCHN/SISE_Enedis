@@ -1,0 +1,121 @@
+import streamlit as st
+
+def show():
+    st.markdown("## 📈 Simulation de Performance Énergétique")
+    
+    # 🌿 Encadré vert style GreenTech
+    st.markdown("""
+    <div class="info-card">
+        Simulez les économies d'énergie potentielles de votre logement
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Informations du logement
+    st.markdown("### 🏠 Caractéristiques de votre logement")
+    col1, col2 = st.columns(2)
+    with col1:
+        surface = st.number_input("Surface habitable (m²)", min_value=10, max_value=500, value=100)
+        type_logement = st.selectbox("Type de logement", ["Appartement", "Maison individuelle", "Immeuble collectif"])
+        annee_construction = st.slider("Année de construction", 1900, 2024, 1990)
+    with col2:
+        nb_occupants = st.number_input("Nombre d'occupants", min_value=1, max_value=10, value=3)
+        type_chauffage = st.selectbox("Type de chauffage", ["Gaz", "Électrique", "Fioul", "Pompe à chaleur", "Bois"])
+        isolation = st.select_slider("Qualité d'isolation", options=["Mauvaise", "Moyenne", "Bonne", "Excellente"], value="Moyenne")
+    
+    st.markdown("---")
+    
+    # Consommation actuelle
+    st.markdown("### 💡 Consommation Actuelle")
+    col1, col2 = st.columns(2)
+    with col1:
+        conso_chauffage = st.number_input("Consommation chauffage (kWh/an)", min_value=0, value=15000)
+        conso_eau_chaude = st.number_input("Consommation eau chaude (kWh/an)", min_value=0, value=3000)
+    with col2:
+        conso_electricite = st.number_input("Consommation électricité (kWh/an)", min_value=0, value=5000)
+        cout_annuel = st.number_input("Coût annuel actuel (€)", min_value=0, value=2000)
+    
+    st.markdown("---")
+    
+    # GreenTech CSS global
+    greentech_style = """
+    <style>
+    [data-testid="stAppViewContainer"] { background-color: #F5F9F6; }
+    [data-testid="stHeader"], [data-testid="stSidebar"] { background: rgba(255,255,255,0.85); }
+    h1, h2, h3, h4 { color: #2E7D32; }
+    .info-card { background-color: #FFFFFF; border: 1px solid #DDEEDD; border-radius: 16px; padding: 20px; box-shadow: 0px 4px 10px rgba(0, 128, 0, 0.1); transition: transform 0.2s ease, box-shadow 0.2s ease; text-align: center; }
+    .info-card:hover { transform: translateY(-3px); box-shadow: 0px 8px 20px rgba(0, 128, 0, 0.15); }
+    .info-card h3 { color: #388E3C; margin-bottom: 5px; }
+    .info-card h2 { color: #4CAF50; margin-top: 0; }
+    .info-card p, .info-card li { color: #333; font-size: 0.95rem; text-align: left; }
+    </style>
+    """
+    st.markdown(greentech_style, unsafe_allow_html=True)
+    
+    # Bouton de simulation
+    if st.button("🚀 Lancer la Simulation", type="primary"):
+        st.success("✅ Simulation terminée !")
+        
+        # 📊 Résultats
+        st.markdown("### 📊 Résultats de la Simulation")
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.markdown("""
+            <div class="info-card">
+                <h3>💰 Économies Potentielles</h3>
+                <h2>850€/an</h2>
+                <p>Soit 42% d'économie</p>
+            </div>
+            """, unsafe_allow_html=True)
+        with col2:
+            st.markdown("""
+            <div class="info-card">
+                <h3>🌱 Réduction CO₂</h3>
+                <h2>2.5 tonnes/an</h2>
+                <p>Équivalent à 15 000 km en voiture</p>
+            </div>
+            """, unsafe_allow_html=True)
+        with col3:
+            st.markdown("""
+            <div class="info-card">
+                <h3>📈 Amélioration DPE</h3>
+                <h2>E → B</h2>
+                <p>+3 classes énergétiques</p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.markdown("---")
+        
+        # 💡 Recommandations
+        st.markdown("### 💡 Recommandations Personnalisées")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("""
+            <div class="info-card">
+                <h4>🔧 Travaux Prioritaires</h4>
+                <ol>
+                    <li>Isolation des combles – Économie : 350€/an</li>
+                    <li>Changement des fenêtres – Économie : 250€/an</li>
+                    <li>Installation pompe à chaleur – Économie : 450€/an</li>
+                </ol>
+                <p><strong>Investissement total :</strong> 18 500€<br>
+                <strong>Retour sur investissement :</strong> 12 ans</p>
+            </div>
+            """, unsafe_allow_html=True)
+        with col2:
+            st.markdown("""
+            <div class="info-card">
+                <h4>🎁 Aides Financières Disponibles</h4>
+                <ul>
+                    <li>MaPrimeRénov' : 5 000€</li>
+                    <li>CEE (Certificats d'Économie d'Énergie) : 2 500€</li>
+                    <li>Éco-PTZ : Prêt jusqu'à 30 000€</li>
+                    <li>TVA réduite à 5,5%</li>
+                </ul>
+                <p><strong>Total aides :</strong> 7 500€</p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.markdown("---")
+        
+        if st.button("📥 Télécharger le rapport complet (PDF)"):
+            st.info("Fonctionnalité en développement - Le rapport sera disponible prochainement")
