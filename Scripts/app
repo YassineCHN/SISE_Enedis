@@ -1,0 +1,150 @@
+# app_greentech.py - Fichier principal
+import streamlit as st
+
+# Configuration de la page
+st.set_page_config(
+    page_title="Greentech Solutions",
+    page_icon="🌱",
+    layout="wide"
+)
+
+# CSS personnalisé pour le thème bleu foncé et vert
+st.markdown("""
+    <style>
+    /* 🌿 Fond général blanc */
+    .stApp {
+        background-color: #ffffff;
+    }
+
+    /* Tabs avec dégradé de vert #097536 */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+        background-color: #e9f5ee; /* vert très très clair */
+        padding: 10px;
+        border-radius: 10px;
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        background-color: #cce8da; /* vert clair */
+        color: #097536; /* vert principal */
+        border-radius: 5px;
+        padding: 10px 20px;
+        font-weight: 500;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .stTabs [data-baseweb="tab"]:hover {
+        background-color: #b2dec9;
+    }
+
+    .stTabs [aria-selected="true"] {
+        background-color: #097536 !important; /* vert principal */
+        color: white !important;
+        font-weight: bold;
+    }
+
+    /* 🌱 Titre principal */
+    .main-title {
+        color: #097536;
+        font-size: 4rem;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 20px;
+        text-shadow: 1px 1px 4px rgba(0,0,0,0.15);
+    }
+
+    /* Cartes vertes harmonisées */
+    .info-card {
+        background-color: #e9f5ee; /* fond vert très clair */
+        padding: 20px;
+        border-radius: 10px;
+        border-left: 4px solid #097536; /* bordure verte */
+        margin: 10px 0;
+        color: #094c2e; /* vert texte légèrement plus foncé */
+    }
+
+    /* Texte global */
+    h1, h2, h3, p {
+        color: #094c2e !important; /* ton sombre du vert */
+    }
+
+    /* Liens */
+    a {
+        color: #097536;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    a:hover {
+        text-decoration: underline;
+    }
+
+    /* Masquer la barre latérale Streamlit */
+    [data-testid="stSidebar"] {
+        display: none;
+    }
+    [data-testid="stAppViewContainer"] {
+        margin-left: 0 !important;
+        padding-left: 0 !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+
+
+
+# Logo principal centré
+#st.markdown(
+    # """
+#     <div style='display: flex; justify-content: center; align-items: center; margin-top: 20px; margin-bottom: 20px;'>
+#         <img src='assets/logo_greentech.png' alt='GreenTech Solutions Logo' width='300'>
+#     </div>
+#     """,
+#     unsafe_allow_html=True
+# )
+import os
+from PIL import Image
+
+# Chemin vers ton logo
+logo_path = os.path.join(os.path.dirname(__file__), "assets", "logo_greentech.png")
+
+# Vérifie si le logo existe et affiche-le
+if os.path.exists(logo_path):
+    logo = Image.open(logo_path)
+    # Trois colonnes : gauche, centre, droite
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col3:
+        st.image(logo, width=300, use_container_width=False)
+else:
+    st.warning("⚠️ Logo non trouvé. Vérifie qu'il est bien dans le dossier 'assets/logo_greentech.png'.")
+
+
+# Import des modules pour chaque onglet
+from pages import accueil, statistiques_dpe, simulation, contexte
+
+# Création des onglets
+tab1, tab2, tab3, tab4 = st.tabs(["🏠 Accueil", "❓ Contexte des données", "📊 Statistiques & DPE", "📈 Simulation"])
+
+with tab1:
+    accueil.show()
+
+with tab2:
+    contexte.show()
+
+with tab3:
+    statistiques_dpe.show()
+
+with tab4:
+    simulation.show()
+
+#Masque la barre avec du CSS 
+st.markdown("""
+    <style>
+    /* Masquer le menu latéral Streamlit */
+    [data-testid="stSidebar"] {display: none;}
+    /* Élargir le contenu principal */
+    [data-testid="stAppViewContainer"] {
+        margin-left: 0 !important;
+        padding-left: 0 !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
