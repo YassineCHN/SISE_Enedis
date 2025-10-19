@@ -1,0 +1,95 @@
+import streamlit as st
+import pandas as pd
+import numpy as np
+
+def show():
+    st.markdown("## 📊 Statistiques & Diagnostic de Performance Énergétique")
+    
+    # Section DPE
+    st.markdown("### 🏠 Diagnostic de Performance Énergétique (DPE)")
+    
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        st.markdown("""
+        <div class="info-card">
+            <h3>Qu'est-ce que le DPE ?</h3>
+            <p>Le DPE est un diagnostic qui évalue la performance énergétique d'un logement 
+            en mesurant sa consommation d'énergie et son impact sur les émissions de gaz à effet de serre.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div class="info-card">
+            <h3>📋 Classes Énergétiques</h3>
+            <p>
+            A : Très performant<br>
+            B : Performant<br>
+            C : Assez performant<br>
+            D : Moyennement performant<br>
+            E : Peu performant<br>
+            F : Très peu performant<br>
+            G : Extrêmement peu performant
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    # Statistiques générales
+    st.markdown("### 📈 Statistiques Nationales")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.metric("Consommation Moyenne", "250 kWh/m²/an", "-5%")
+    
+    with col2:
+        st.metric("Classe DPE Moyenne", "D", "Stable")
+    
+    with col3:
+        st.metric("Émissions Moyennes", "45 kg CO2/m²/an", "-8%")
+    
+    st.markdown("---")
+    
+    # Filtre et analyse
+    st.markdown("### 🔍 Analysez les Données")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        region = st.selectbox("Région", ["Auvergne-Rhône-Alpes", "Île-de-France", "PACA", "Occitanie", "Nouvelle-Aquitaine"])
+    
+    with col2:
+        type_logement = st.selectbox("Type de logement", ["Appartement", "Maison", "Bureau", "Commerce"])
+    
+    with col3:
+        annee = st.selectbox("Année de construction", ["Avant 1948", "1948-1974", "1975-1989", "1990-2005", "Après 2005"])
+    
+    if st.button("Afficher les statistiques", type="primary"):
+        st.success("✅ Données chargées avec succès")
+        
+        # Simulation de données
+        data = {
+            "Classe DPE": ["A", "B", "C", "D", "E", "F", "G"],
+            "Nombre de logements": np.random.randint(100, 5000, 7),
+            "% Total": np.random.randint(5, 30, 7)
+        }
+        df = pd.DataFrame(data)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("#### Répartition des Classes DPE")
+            st.dataframe(df, use_container_width=True)
+        
+        with col2:
+            st.markdown("#### Recommandations")
+            st.markdown("""
+            <div class="info-card">
+                <p>• 45% des logements nécessitent une rénovation<br>
+                • Potentiel d'économie moyen : 850€/an<br>
+                • Réduction CO2 possible : 2.5 tonnes/an</p>
+            </div>
+            """, unsafe_allow_html=True)
