@@ -141,6 +141,101 @@ st.markdown("""
     * {
         scrollbar-color: #097536 #e9f5ee;
     }
+        /* Cartes avec gradient subtil */
+    .modern-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fdf9 100%) !important;
+        border-radius: 20px !important;
+        padding: 30px !important;
+        margin: 15px 0 !important;
+        box-shadow: 0 8px 24px rgba(9, 117, 54, 0.12) !important;
+        border: 1px solid rgba(9, 117, 54, 0.08) !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        text-align: left !important;
+    }
+    
+    .modern-card:hover {
+        transform: translateY(-4px) !important;
+        box-shadow: 0 12px 32px rgba(9, 117, 54, 0.18) !important;
+    }
+    
+    .modern-card h3 {
+        color: #097536 !important;
+        font-size: 1.4rem !important;
+        margin-bottom: 15px !important;
+        font-weight: 600 !important;
+        text-align: left !important;
+    }
+    
+    .modern-card p, .modern-card ul, .modern-card li {
+        color: #2c5f3f !important;
+        line-height: 1.7 !important;
+        font-size: 1.05rem !important;
+        text-align: left !important;
+    }
+    
+    /* Métriques stylées */
+    .metric-modern {
+        background: linear-gradient(135deg, #ffffff 0%, #eef9f3 100%) !important;
+        border-radius: 16px !important;
+        padding: 24px !important;
+        margin: 10px 0 !important;
+        box-shadow: 0 6px 20px rgba(9, 117, 54, 0.1) !important;
+        border-left: 4px solid #097536 !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .metric-modern:hover {
+        transform: translateX(5px) !important;
+        box-shadow: 0 8px 28px rgba(9, 117, 54, 0.15) !important;
+    }
+    
+    .metric-modern h4 {
+        color: #097536 !important;
+        font-size: 1.15rem !important;
+        margin-bottom: 12px !important;
+        font-weight: 600 !important;
+    }
+    
+    .metric-value {
+        font-size: 1.8rem !important;
+        font-weight: bold !important;
+        color: #094c2e !important;
+        margin: 8px 0 !important;
+    }
+    
+    .metric-detail {
+        color: #555 !important;
+        font-size: 0.95rem !important;
+        margin: 6px 0 !important;
+    }
+    
+    /* Titre avec bordure */
+    .section-title {
+        color: #097536 !important;
+        font-size: 1.8rem !important;
+        font-weight: 700 !important;
+        margin: 30px 0 20px 0 !important;
+        padding-bottom: 10px !important;
+        border-bottom: 3px solid #097536 !important;
+    }
+    
+    /* Badges DPE */
+    .dpe-badge {
+        display: inline-block !important;
+        padding: 8px 16px !important;
+        border-radius: 8px !important;
+        font-weight: bold !important;
+        margin: 4px !important;
+        font-size: 1rem !important;
+    }
+    
+    .dpe-a { background: #007f00 !important; color: white !important; }
+    .dpe-b { background: #4CAF50 !important; color: white !important; }
+    .dpe-c { background: #CDDC39 !important; color: #333 !important; }
+    .dpe-d { background: #FFEB3B !important; color: #333 !important; }
+    .dpe-e { background: #FFC107 !important; color: #333 !important; }
+    .dpe-f { background: #FF5722 !important; color: white !important; }
+    .dpe-g { background: #B71C1C !important; color: white !important; }        
     </style>
 """, unsafe_allow_html=True)
 
@@ -161,13 +256,11 @@ else:
 from pages import accueil, statistiques_dpe, simulation, contexte
 
 # --- Création des onglets ---
-tab1, tab2, tab3, tab4 = st.tabs(["🏠 Accueil", "❓ Contexte des données", "📊 Statistiques & DPE", "📈 Simulation"])
+tab1, tab2, tab3= st.tabs([" Contexte des données", " Statistiques & DPE", " Simulation"])
 
 with tab1:
-    accueil.show()
-with tab2:
     contexte.show()
-with tab3:
+with tab2:
     statistiques_dpe.show()
-with tab4:
+with tab3:
     simulation.show()
