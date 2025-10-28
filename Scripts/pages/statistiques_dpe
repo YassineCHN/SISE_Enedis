@@ -1,95 +1,337 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import plotly.express as px
+import folium
+from streamlit_folium import st_folium
+from pyproj import Transformer
+from functools import lru_cache
+
+#  OPTIMISATION : Cache pour charger les données UNE SEULE FOIS
+@st.cache_data(ttl=3600)
+def load_data():
+    """Charge et prépare les données une seule fois"""
+    csv_path = r"C:\Users\perri\Documents\MASTER SISE\Cours\Machine Learning sous Python\dpe-v2-logements-existants.csv"
+    
+    # Chargement avec colonnes spécifiques seulement (plus rapide)
+    cols_needed = [
+        "Code_postal_(BAN)", "Type_bâtiment", "Type_énergie_principale_chauffage",
+        "Type_énergie_principale_ECS", "Période_construction", "Surface_habitable_logement",
+        "Conso_5_usages_é_finale", "Conso_chauffage_é_finale", "Conso_ECS_é_finale",
+        "Année_construction", "Typologie_logement", "Etiquette_DPE", "Etiquette_GES",
+        "Conso_5_usages_par_m²_é_primaire", "Emission_GES_5_usages_par_m²",
+        "Type_installation_chauffage", "Type_installation_ECS_(général)",
+        "Coût_total_5_usages", "Coût_chauffage", "Coût_ECS", "Coût_éclairage",
+        "Ubat_W/m²_K", "Qualité_isolation_enveloppe", "Qualité_isolation_menuiseries",
+        "Qualité_isolation_murs", "Isolation_toiture_(0/1)", "Indicateur_confort_été",
+        "Logement_traversant_(0/1)", "Coordonnée_cartographique_X_(BAN)",
+        "Coordonnée_cartographique_Y_(BAN)", "Nom__commune_(BAN)"
+    ]
+    
+    df = pd.read_csv(csv_path, sep=',', encoding='utf-8', low_memory=False, usecols=cols_needed)
+    
+    # Conversion en numérique
+    numeric_cols = ["Conso_5_usages_é_finale", "Conso_chauffage_é_finale", "Conso_ECS_é_finale"]
+    for col in numeric_cols:
+        df[col] = pd.to_numeric(df[col], errors='coerce')
+    
+    # Nettoyage code postal
+    df['Code_postal_(BAN)'] = (
+        df['Code_postal_(BAN)']
+        .astype(str)
+        .str.replace(r'\.0$', '', regex=True)
+        .str.strip()
+    )
+    df = df[df['Code_postal_(BAN)'].notna() & (df['Code_postal_(BAN)'] != 'nan') & (df['Code_postal_(BAN)'] != '')]
+    
+    return df
+
+@st.cache_data(ttl=3600)
+def prepare_map_data(df):
+    """Prépare les données cartographiques (conversion coordonnées)"""
+    transformer = Transformer.from_crs("EPSG:2154", "EPSG:4326", always_xy=True)
+    
+    # Conversion des coordonnées
+    df_map = df.dropna(subset=['Coordonnée_cartographique_X_(BAN)', 'Coordonnée_cartographique_Y_(BAN)']).copy()
+    df_map['lon'], df_map['lat'] = transformer.transform(
+        df_map['Coordonnée_cartographique_X_(BAN)'].values,
+        df_map['Coordonnée_cartographique_Y_(BAN)'].values
+    )
+    
+    # Nettoyage coordonnées
+    df_map = df_map[(df_map['lat'].between(41, 51)) & (df_map['lon'].between(-5, 10))]
+    
+    # Limiter à 50 000 points max pour performances
+    if len(df_map) > 50_000:
+        df_map = df_map.sample(50_000, random_state=42)
+    
+    return df_map
+
 
 def show():
-    st.markdown("## 📊 Statistiques & Diagnostic de Performance Énergétique")
-    
-    # Section DPE
-    st.markdown("### 🏠 Diagnostic de Performance Énergétique (DPE)")
-    
-    col1, col2 = st.columns([2, 1])
-    
-    with col1:
-        st.markdown("""
-        <div class="info-card">
-            <h3>Qu'est-ce que le DPE ?</h3>
-            <p>Le DPE est un diagnostic qui évalue la performance énergétique d'un logement 
-            en mesurant sa consommation d'énergie et son impact sur les émissions de gaz à effet de serre.</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-        <div class="info-card">
-            <h3>📋 Classes Énergétiques</h3>
-            <p>
-            A : Très performant<br>
-            B : Performant<br>
-            C : Assez performant<br>
-            D : Moyennement performant<br>
-            E : Peu performant<br>
-            F : Très peu performant<br>
-            G : Extrêmement peu performant
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown("---")
-    
-    # Statistiques générales
-    st.markdown("### 📈 Statistiques Nationales")
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.metric("Consommation Moyenne", "250 kWh/m²/an", "-5%")
-    
-    with col2:
-        st.metric("Classe DPE Moyenne", "D", "Stable")
-    
-    with col3:
-        st.metric("Émissions Moyennes", "45 kg CO2/m²/an", "-8%")
-    
-    st.markdown("---")
-    
-    # Filtre et analyse
-    st.markdown("### 🔍 Analysez les Données")
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        region = st.selectbox("Région", ["Auvergne-Rhône-Alpes", "Île-de-France", "PACA", "Occitanie", "Nouvelle-Aquitaine"])
-    
-    with col2:
-        type_logement = st.selectbox("Type de logement", ["Appartement", "Maison", "Bureau", "Commerce"])
-    
-    with col3:
-        annee = st.selectbox("Année de construction", ["Avant 1948", "1948-1974", "1975-1989", "1990-2005", "Après 2005"])
-    
-    if st.button("Afficher les statistiques", type="primary"):
-        st.success("✅ Données chargées avec succès")
         
-        # Simulation de données
-        data = {
-            "Classe DPE": ["A", "B", "C", "D", "E", "F", "G"],
-            "Nombre de logements": np.random.randint(100, 5000, 7),
-            "% Total": np.random.randint(5, 30, 7)
-        }
-        df = pd.DataFrame(data)
-        
-        col1, col2 = st.columns(2)
-        
+    # Chargement des données avec spinner moderne
+    with st.spinner('🔄 Chargement des données...'):
+        df = load_data()
+    
+    # --- Création des sous-onglets ---
+    tab_stats, tab_graphs, tab_map = st.tabs([" Statistiques", " Graphiques", " Cartographie"])
+
+    # === ONGLET 1 : STATISTIQUES ===
+    with tab_stats:
+
+        st.markdown('<p class="section-title"> Filtrer les données</p>', unsafe_allow_html=True)
+
+        # --- FILTRES COMPACTS ---
+        col1, col2, col3 = st.columns(3)
         with col1:
-            st.markdown("#### Répartition des Classes DPE")
-            st.dataframe(df, use_container_width=True)
+            selected_codes_postaux = st.multiselect(" Code postal", 
+                options=sorted(df['Code_postal_(BAN)'].dropna().unique()), key="cp_stats")
+        with col2:
+            selected_types_batiment = st.multiselect(" Type de bâtiment", 
+                options=sorted(df['Type_bâtiment'].dropna().unique()), key="bat_stats")
+        with col3:
+            selected_periodes = st.multiselect(" Période construction", 
+                options=sorted(df['Période_construction'].dropna().unique()), key="per_stats")
+
+        col4, col5 = st.columns(2)
+        with col4:
+            selected_types_energie = st.multiselect(" Énergie chauffage", 
+                options=sorted(df['Type_énergie_principale_chauffage'].dropna().unique()), key="ener_stats")
+        with col5:
+            selected_types_energie_ecs = st.multiselect(" Énergie ECS", 
+                options=sorted(df['Type_énergie_principale_ECS'].dropna().unique()), key="ecs_stats")
+
+        min_surface = int(df['Surface_habitable_logement'].min())
+        max_surface = int(df['Surface_habitable_logement'].max())
+        selected_surface = st.slider(" Surface habitable (m²)", min_value=min_surface, 
+            max_value=max_surface, value=(min_surface, max_surface), key="surf_stats")
+
+        # --- APPLICATION DES FILTRES ---
+        filtered_df = df.copy()
+        if selected_codes_postaux:
+            filtered_df = filtered_df[filtered_df['Code_postal_(BAN)'].isin(selected_codes_postaux)]
+        if selected_types_batiment:
+            filtered_df = filtered_df[filtered_df['Type_bâtiment'].isin(selected_types_batiment)]
+        if selected_types_energie:
+            filtered_df = filtered_df[filtered_df['Type_énergie_principale_chauffage'].isin(selected_types_energie)]
+        if selected_types_energie_ecs:
+            filtered_df = filtered_df[filtered_df['Type_énergie_principale_ECS'].isin(selected_types_energie_ecs)]
+        if selected_periodes:
+            filtered_df = filtered_df[filtered_df['Période_construction'].isin(selected_periodes)]
+        filtered_df = filtered_df[
+            (filtered_df['Surface_habitable_logement'] >= selected_surface[0]) &
+            (filtered_df['Surface_habitable_logement'] <= selected_surface[1])
+        ]
+
+        st.markdown("---")
+        st.markdown('<p class="section-title"> Résultats</p>', unsafe_allow_html=True)
+
+        # --- CALCUL STATISTIQUES ---
+        conso_cols = {
+            " Consommation totale": ("Conso_5_usages_é_finale", "kWh/an"),
+            " Consommation chauffage": ("Conso_chauffage_é_finale", "kWh/an"),
+            " Consommation eau chaude": ("Conso_ECS_é_finale", "kWh/an")
+        }
+
+        if filtered_df.empty:
+            st.warning("⚠️ Aucune donnée ne correspond aux filtres sélectionnés.")
+        else:
+            cols = st.columns(3)
+            for col, (label, (col_name, unit)) in zip(cols, conso_cols.items()):
+                if col_name in filtered_df.columns and not filtered_df[col_name].dropna().empty:
+                    mean_val = filtered_df[col_name].mean()
+                    std_val = filtered_df[col_name].std()
+                    min_val = filtered_df[col_name].min()
+                    max_val = filtered_df[col_name].max()
+                    
+                    col.markdown(f"""
+                    <div class="metric-modern">
+                        <h4>{label}</h4>
+                        <div style="font-size: 0.9rem; color: #666; margin-bottom: 8px; font-weight: 600;">Moyenne</div>
+                        <div class="metric-value">{mean_val:,.0f} {unit}</div>
+                        <div class="metric-detail"> Écart-type: {std_val:,.0f} {unit}</div>
+                        <div class="metric-detail"> Min: {min_val:,.0f} {unit} |  Max: {max_val:,.0f} {unit}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+    # === ONGLET 2 : GRAPHIQUES ===
+    with tab_graphs:
+        st.markdown('<p class="section-title"> Visualisation graphique interactive</p>', unsafe_allow_html=True)
+
+        # --- Colonnes et noms ---
+        colonnes_disponibles = [
+            "Année_construction", "Type_bâtiment", "Typologie_logement",
+            "Surface_habitable_logement", "Etiquette_DPE", "Etiquette_GES",
+            "Conso_5_usages_par_m²_é_primaire", "Conso_5_usages_é_finale",
+            "Emission_GES_5_usages_par_m²", "Conso_chauffage_é_finale",
+            "Conso_ECS_é_finale", "Type_énergie_principale_chauffage",
+            "Type_énergie_principale_ECS", "Type_installation_chauffage",
+            "Type_installation_ECS_(général)", "Coût_total_5_usages", 
+            "Coût_chauffage", "Coût_ECS", "Coût_éclairage",
+            "Ubat_W/m²_K", "Qualité_isolation_enveloppe", 
+            "Qualité_isolation_menuiseries", "Qualité_isolation_murs",
+            "Isolation_toiture_(0/1)", "Indicateur_confort_été",
+            "Logement_traversant_(0/1)"
+        ]
+
+        noms_affiches = {
+            "Année_construction": "Année de construction",
+            "Type_bâtiment": "Type de bâtiment",
+            "Typologie_logement": "Typologie du logement",
+            "Surface_habitable_logement": "Surface habitable (m²)",
+            "Etiquette_DPE": "Étiquette DPE",
+            "Etiquette_GES": "Étiquette GES",
+            "Conso_5_usages_par_m²_é_primaire": "Conso énergie primaire (kWh/m².an)",
+            "Conso_5_usages_é_finale": "Conso totale énergie finale (kWh/an)",
+            "Emission_GES_5_usages_par_m²": "Émissions CO₂ (kgCO₂/m².an)",
+            "Conso_chauffage_é_finale": "Conso chauffage (kWh/an)",
+            "Conso_ECS_é_finale": "Conso eau chaude (kWh/an)",
+            "Type_énergie_principale_chauffage": "Type d'énergie principale chauffage",
+            "Type_énergie_principale_ECS": "Type d'énergie principale ECS",
+            "Type_installation_chauffage": "Type d'installation chauffage",
+            "Type_installation_ECS_(général)": "Type d'installation ECS",
+            "Coût_total_5_usages": "Coût total énergie (€)",
+            "Coût_chauffage": "Coût chauffage (€)",
+            "Coût_ECS": "Coût ECS (€)",
+            "Coût_éclairage": "Coût éclairage (€)",
+            "Ubat_W/m²_K": "Déperdition thermique (Ubat W/m².K)",
+            "Qualité_isolation_enveloppe": "Qualité isolation enveloppe",
+            "Qualité_isolation_menuiseries": "Qualité isolation menuiseries",
+            "Qualité_isolation_murs": "Qualité isolation murs",
+            "Isolation_toiture_(0/1)": "Isolation toiture",
+            "Indicateur_confort_été": "Indicateur confort été",
+            "Logement_traversant_(0/1)": "Logement traversant"
+        }
+
+        # Palette moderne
+        palette = ["#097536", "#4CAF50", "#81C784", "#A5D6A7", "#C8E6C9"]
+
+        col1, col2 = st.columns([1, 2])
+        with col1:
+            type_graphique = st.selectbox(" Type de graphique", 
+                ["Histogramme", "Nuage de points", "Boxplot", "Diagramme circulaire"])
         
         with col2:
-            st.markdown("#### Recommandations")
-            st.markdown("""
-            <div class="info-card">
-                <p>• 45% des logements nécessitent une rénovation<br>
-                • Potentiel d'économie moyen : 850€/an<br>
-                • Réduction CO2 possible : 2.5 tonnes/an</p>
-            </div>
-            """, unsafe_allow_html=True)
+            if type_graphique == "Nuage de points":
+                subcol1, subcol2 = st.columns(2)
+                with subcol1:
+                    valeur_x = st.selectbox("Axe X", options=colonnes_disponibles,
+                        format_func=lambda x: noms_affiches.get(x, x), key="x_graph")
+                with subcol2:
+                    colonnes_y = [c for c in colonnes_disponibles if c != valeur_x]
+                    valeur_y = st.selectbox("Axe Y", options=colonnes_y,
+                        format_func=lambda x: noms_affiches.get(x, x), key="y_graph")
+            else:
+                valeur_x = st.selectbox("Variable", options=colonnes_disponibles,
+                    format_func=lambda x: noms_affiches.get(x, x), key="var_graph")
+                valeur_y = None
+
+        # --- Génération graphique ---
+        if valeur_x:
+            data = df[[valeur_x]].dropna() if valeur_y is None else df[[valeur_x, valeur_y]].dropna()
+            
+            # Limiter à 100k points pour performances
+            if len(data) > 100_000:
+                data = data.sample(100_000, random_state=42)
+
+            if not data.empty:
+                fig = None
+                if type_graphique == "Histogramme":
+                    fig = px.histogram(
+                        data, 
+                        x=valeur_x, 
+                        nbins=30, 
+                        color_discrete_sequence=palette,
+                        title=f"Histogramme : {noms_affiches.get(valeur_x, valeur_x)}",
+                        labels={valeur_x: noms_affiches.get(valeur_x, valeur_x)}
+                    )
+                elif type_graphique == "Nuage de points":
+                    fig = px.scatter(
+                        data, 
+                        x=valeur_x, 
+                        y=valeur_y, 
+                        opacity=0.5, 
+                        color_discrete_sequence=palette,
+                        title=f"Nuage de points : {noms_affiches.get(valeur_x, valeur_x)} vs {noms_affiches.get(valeur_y, valeur_y)}",
+                        labels={
+                            valeur_x: noms_affiches.get(valeur_x, valeur_x),
+                            valeur_y: noms_affiches.get(valeur_y, valeur_y)
+                        }
+                    )
+                elif type_graphique == "Boxplot":
+                    fig = px.box(
+                        data, 
+                        y=valeur_x, 
+                        color_discrete_sequence=palette,
+                        title=f"Boxplot : {noms_affiches.get(valeur_x, valeur_x)}",
+                        labels={valeur_x: noms_affiches.get(valeur_x, valeur_x)}
+                    )
+                elif type_graphique == "Diagramme circulaire":
+                    counts = data[valeur_x].value_counts().head(8).reset_index()
+                    counts.columns = [valeur_x, 'Count']
+                    fig = px.pie(
+                        counts, 
+                        names=valeur_x, 
+                        values='Count', 
+                        color_discrete_sequence=palette,
+                        title=f"Répartition : {noms_affiches.get(valeur_x, valeur_x)}"
+                    )
+
+                fig.update_layout(
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    font=dict(color='#094c2e'),
+                    margin=dict(l=20, r=20, t=50, b=20),
+                    title_x=0.5,
+                    title_font=dict(size=18, color='#097536')
+                )
+                st.plotly_chart(fig, use_container_width=True)
+
+    # === ONGLET 3 : CARTOGRAPHIE ===
+    with tab_map:
+        st.markdown('<p class="section-title"> Cartographie des logements DPE</p>', unsafe_allow_html=True)
+
+        with st.spinner(' Préparation de la carte...'):
+            df_map = prepare_map_data(df)
+
+        etiquettes_dispo = sorted(df_map['Etiquette_DPE'].dropna().unique())
+        selected_etiquettes = st.multiselect("🏷️ Filtrer par classe énergétique :",
+            options=etiquettes_dispo, default=etiquettes_dispo[:3], key="map_filter")
+
+        if selected_etiquettes:
+            df_filtered = df_map[df_map['Etiquette_DPE'].isin(selected_etiquettes)]
+        else:
+            df_filtered = df_map.head(10000)  # Limiter si aucun filtre
+
+        color_map = {
+            "A": "#007f00", "B": "#4CAF50", "C": "#CDDC39", "D": "#FFEB3B",
+            "E": "#FFC107", "F": "#FF5722", "G": "#B71C1C"
+        }
+
+        # Conteneur pour éviter le rechargement complet
+        map_container = st.container()
+        
+        with map_container:
+            m = folium.Map(location=[45.75, 4.85], zoom_start=9, tiles="cartodb positron")
+
+            for _, row in df_filtered.iterrows():
+                dpe = str(row.get('Etiquette_DPE', 'N/A'))
+                tooltip_html = f"""
+                    <b>🏷️ Étiquette DPE :</b> {dpe}<br>
+                    <b>🏢 Type bâtiment :</b> {row.get('Type_bâtiment', 'N/A')}<br>
+                    <b>📐 Surface :</b> {row.get('Surface_habitable_logement', 'N/A')} m²<br>
+                    <b>📅 Année construction :</b> {row.get('Année_construction', 'N/A')}<br>
+                    <b>🏘️ Commune :</b> {row.get('Nom__commune_(BAN)', 'N/A')}<br>
+                    <b>⚡ Conso totale :</b> {row.get('Conso_5_usages_é_finale', 'N/A')} kWh/an
+                """
+                folium.CircleMarker(
+                    location=[row['lat'], row['lon']],
+                    radius=4,
+                    color=color_map.get(dpe, "gray"),
+                    fill=True,
+                    fill_opacity=0.7,
+                    tooltip=tooltip_html
+                ).add_to(m)
+
+            st_folium(m, width=None, height=600, returned_objects=[])
