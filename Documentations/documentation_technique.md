@@ -68,7 +68,7 @@ _Urllib3_ : Bibliothèque bas niveau pour les connexions HTTP, utilisée en inte
 ### 3. Installation
 - Faire un clône de l'application via la commande `git clone https://github.com/YassineCHN/SISE_Enedis`
 - Bibliothèques: Installer les bibliothèques contenues dans le fichier requirement.txt
-  Activer l'environnement qui va servir à lancer l'application, utiliser la commande `pip install -r chemin_absolu\requirements.txt` afin d'importer les librairies dans cet environnement.
+  Activer l'environnement qui va servir à lancer l'application, utiliser la commande `pip install -r chemin_absolu/requirements.txt` afin d'importer les librairies dans cet environnement.
     
 
 ### 4. Exécution
