@@ -10,7 +10,7 @@ streamlit==1.41.1
 streamlit_folium==0.25.3
 streamlit_lottie==0.0.5
 scikit-learn==1.6.1
-scipy==1.12.0
+scipy==1.14.1
 seaborn==0.13.2
 Pillow==9.4.0
 pandas==2.2.2
