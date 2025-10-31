@@ -1,4 +1,4 @@
-### Documentation technique de l'application
+# Documentation technique de l'application
 
 ## 1. Architecture de l'application 
 
@@ -10,18 +10,24 @@ L'application est structurée de la façon suivante :
   
 - Modèles : fichiers PKL. Ces fichiers contiennent les modèles de classification et de régression entraînés avec les données de l'Ademe. 
 
-- Données : fichiers CSV ou requête vers l'API de l'Ademe des diagnostics de performances énergétiques. 
+- Données : fichiers CSV ou requête vers l'API de l'Ademe des diagnostics de performances énergétiques.
+
+  
+
+Schéma de l'architecture applicative:
+
+
 
 ![Architecture applicative](assets/Architecture_app.drawio.png)
 
 ## 2.  Installation de l'application 
 
-# 1. Prérequis logiciels:
+### 1. Prérequis logiciels:
 - Python 3.11
 - GIT 
 - VSCode
 
-# 2. Prérequis librairies
+### 2. Prérequis librairies
 Vous trouverez dans le fichier *requirement.txt* les librairies à installer pour lancer l'application. 
 
 Visualisation : 
@@ -49,13 +55,13 @@ Urllib3 : Bibliothèque bas niveau pour les connexions HTTP, utilisée en intern
 
 
 
-# 3. Installation
+### 3. Installation
 - Faire un clône de l'application via la commande `git clone https://github.com/YassineCHN/SISE_Enedis`
 - Bibliothèques: Installer les bibliothèques contenues dans le fichier requirement.txt
   Activer l'environnement qui va servir à lancer l'application, utiliser la commande `pip install -r chemin_absolu\requirements.txt` afin d'importer les librairies dans cet environnement.
     
 
-# 4. Exécution
+### 4. Exécution
 - Depuis le terminal, lancer l'application via la commande `streamlit run chemin_absolu/app.py`
 
      
