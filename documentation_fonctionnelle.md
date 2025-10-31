@@ -28,6 +28,7 @@ L'utilisateur peut choisir les étiquettes des DPE qu'il souhaite visualiser.
 ### 3. Simulation 
 
 *Cette page est composée de 2 sous-onglets:*
+
 *- Etiquette DPE: Ce sous-onglet permet à l'utilisateur de prédire son étiquette DPE à l'aide de quelques paramètres qu'il renseigne en amont. Un modèle de classification est utilisé ici. 
 Un bouton permettant de réentraîner le modèle est également disponible sur cette page.*
 
