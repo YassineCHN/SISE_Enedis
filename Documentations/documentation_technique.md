@@ -30,28 +30,38 @@ Schéma de l'architecture applicative:
 ### 2. Prérequis librairies
 Vous trouverez dans le fichier *requirement.txt* les librairies à installer pour lancer l'application. 
 
-Visualisation : 
-Plotly : Graphiques interactifs (3D, cartes, dashboards, etc.)
-Folium : Création de cartes interactives basées sur Leaflet.js (affichage de points géographiques, itinéraires, etc.).
-Seaborn : Visualisation statistique basée sur matplotlib — permet de créer des graphiques esthétiques simplement.
+##### Visualisation :
+_Plotly_ : Graphiques interactifs (3D, cartes, dashboards, etc.)
+
+_Folium_ : Création de cartes interactives basées sur Leaflet.js (affichage de points géographiques, itinéraires, etc.).
+
+_Seaborn_ : Visualisation statistique basée sur matplotlib — permet de créer des graphiques esthétiques simplement.
 
 
-Frameworks web:
-Flask : Micro-framework Python pour créer des applications web et des APIs légères.
-Flasgger : Extension de Flask permettant d’ajouter facilement une documentation Swagger/OpenAPI pour tester ses endpoints API via une interface web.
+##### Frameworks web:
 
-Application : 
-Streamlit : Framework simple pour créer des applications web interactives.
-Streamlit-lottie : Permet d’intégrer des animations Lottie (JSON animés) dans une app Streamlit.
+_Flask_ : Micro-framework Python pour créer des applications web et des APIs légères.
 
-Cartographie :
-Streamlit-folium : Intégration de cartes Folium dans des applications Streamlit.
-Pyproj : Conversion de coordonnées géographiques et projections cartographiques.
+_Flasgger_ : Extension de Flask permettant d’ajouter facilement une documentation Swagger/OpenAPI pour tester ses endpoints API via une interface web.
 
-API: 
-Requests : Envoie des requêtes HTTP (GET, POST, etc.) à des APIs ou sites web.
-Requests-oauthlib :	Gère les authentifications OAuth (utile pour accéder à des APIs protégées).
-Urllib3 : Bibliothèque bas niveau pour les connexions HTTP, utilisée en interne par requests.
+##### Application : 
+_Streamlit_ : Framework simple pour créer des applications web interactives.
+
+_Streamlit-lottie_ : Permet d’intégrer des animations Lottie (JSON animés) dans une app Streamlit.
+
+##### Cartographie :
+
+_Streamlit-folium_ : Intégration de cartes Folium dans des applications Streamlit.
+
+_Pyproj_ : Conversion de coordonnées géographiques et projections cartographiques.
+
+##### API:
+
+_Requests_ : Envoie des requêtes HTTP (GET, POST, etc.) à des APIs ou sites web.
+
+_Requests-oauthlib_ :	Gère les authentifications OAuth (utile pour accéder à des APIs protégées).
+
+_Urllib3_ : Bibliothèque bas niveau pour les connexions HTTP, utilisée en interne par requests.
 
 
 
