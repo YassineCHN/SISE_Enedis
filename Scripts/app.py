@@ -253,7 +253,7 @@ else:
     st.warning("⚠️ Logo non trouvé. Vérifie qu'il est bien dans le dossier 'assets/logo_greentech.png'.")
 
 # --- Import des modules pour chaque onglet ---
-from pages import accueil, statistiques_dpe, simulation, contexte
+from pages import statistiques_dpe, simulation, contexte
 
 # --- Création des onglets ---
 tab1, tab2, tab3= st.tabs([" Contexte des données", " Statistiques & DPE", " Simulation"])
