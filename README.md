@@ -30,14 +30,15 @@ pip install -r requirements.txt
 Voici une présentation de la structure du projet:
 
 SISE_Enedis/
-├── data/               # Jeux de données bruts et/ou intermédiaires  
-├── Notebooks/          # Notebooks Jupyter d’analyse exploratoire  
-├── Scripts/            # Scripts Python pour traitement, modélisation, interface  
-├── Modèle/             # Fichiers relatifs au modèle (par ex. model.py)  
-├── Documentations/     # Documentation, manuel utilisateur, guide Git  
-├── api.py              # Module API (si l’application utilise une API)  
-├── requirements.txt    # Liste des dépendances Python  
-└── README.md           # Ce fichier
+
+├── data/               *# Jeux de données bruts et/ou intermédiaires*  
+├── Notebooks/          *# Notebooks Jupyter d’analyse exploratoire*  
+├── Scripts/            *# Scripts Python pour traitement, modélisation, interface*  
+├── Modèle/             *# Fichiers relatifs au modèle (par ex. model.py)*  
+├── Documentations/     *# Documentation, manuel utilisateur, guide Git*  
+├── api.py              *# Module API (si l’application utilise une API)*  
+├── requirements.txt    *# Liste des dépendances Python*  
+└── README.md           *# Ce fichier*
 
 
 Le lancement de l'application se fait via le fichier app.py contenu dans le dossier Scripts
