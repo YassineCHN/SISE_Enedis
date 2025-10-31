@@ -31,7 +31,7 @@ Voici une présentation de la structure du projet:
 
 SISE_Enedis/
 
-├── data/               *# Jeux de données bruts et/ou intermédiaires*  
+├── data/               *# Jeux de données*  
 ├── Notebooks/          *# Notebooks Jupyter d’analyse exploratoire*  
 ├── Scripts/            *# Scripts Python pour traitement, modélisation, interface*  
 ├── Modèle/             *# Fichiers relatifs au modèle (par ex. model.py)*  
