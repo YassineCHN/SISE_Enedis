@@ -3,12 +3,16 @@ services:
     name: sise-enedis
     env: python
     plan: free
-    region: frankfurt  # ou oregon / singapore selon ta localisation
-    buildCommand: pip install -r requirements.txt
+    region: frankfurt
+    buildCommand: |
+      apt-get update && apt-get install -y git-lfs
+      git lfs install
+      git lfs pull
+      pip install --upgrade pip
+      pip install -r requirements.txt
     startCommand: streamlit run Scripts/app/main.py --server.port $PORT --server.address 0.0.0.0
     autoDeploy: true
-    # Si tu veux ignorer certaines branches (ex: ne déployer que "dev" ou "main") :
-    branch: new_departement   # à changer plus tard vers main quand tu seras prêt
+    branch: new_departement
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.0
