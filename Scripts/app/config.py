@@ -9,7 +9,7 @@ MODEL_DIR = ROOT_DIR / "models"
 # Remplace ceci :
 # DEFAULT_DATA_FILE = "dataset_clean.csv"
 # par :
-DEFAULT_DATA_FILE = "donnees_dpe_71_clean.csv"
+DEFAULT_DATA_FILE = "donnees_dpe_73_clean.csv"
 
 # Et indique le bon sous-dossier ("." = racine de data)
 DEFAULT_DATA_SUBDIR = "."
