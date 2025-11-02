@@ -48,7 +48,7 @@ def load_models():
         if path and os.path.exists(path):
             models[key] = joblib.load(path)
         else:
-            st.warning(f"⚠️ Modèle manquant : {path}")
+            st.info(f"ℹ️ Modèle non chargé : {path}")
             models[key] = None
     return models
 
@@ -76,13 +76,13 @@ def dpe_label_from_model(model_pipeline, X_input):
         mapping = {c: c for c in classes}
         return label, y_raw, mapping
 
-    # Cas 2 : modèle numérique
+    # Cas 2 : modèle numérique (sécurité)
+    letters = ["G", "F", "E", "D", "C", "B", "A"]  # de plus mauvais à meilleur
     try:
         if classes is None:
             classes_sorted = list(range(7))
         else:
             classes_sorted = sorted(list(classes))
-        letters = ["G","F","E","D","C","B","A"]
         mapping = {cls: letters[i] for i, cls in enumerate(classes_sorted)}
         label = mapping.get(y_raw)
         return label, y_raw, mapping
