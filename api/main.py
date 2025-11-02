@@ -11,6 +11,7 @@ from config import MODEL_DPE_PATH, MODEL_CONSO_PATH
 from models_loader import load_model
 from schemas import InputFeatures
 from utils import normalize_input
+import requests
 
 # ------------------------------------------------------------
 # ⚙️ Initialisation FastAPI
@@ -161,6 +162,85 @@ def predict_sample(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur GET prédiction : {e}")
 
+@app.post("/refresh_data")
+def refresh_data():
+    """
+    Met à jour le dataset local en récupérant les DPE (existants + neufs)
+    plus récents que la dernière date locale, depuis les APIs ADEME.
+    """
+    import pyproj
+
+    if not os.path.exists(DATA_PATH):
+        raise HTTPException(status_code=404, detail="Dataset local introuvable.")
+
+    # --- Lecture dataset local ---
+    try:
+        df_local = pd.read_csv(DATA_PATH)
+        last_date = pd.to_datetime(df_local["date_reception_dpe"], errors="coerce").max()
+        last_date_str = last_date.strftime("%Y-%m-%d")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur lecture dataset local : {e}")
+
+    st_cols = list(df_local.columns)  # Schéma de référence
+    print(f"[INFO] {len(st_cols)} colonnes attendues dans le dataset final.")
+
+    # --- Paramètres communs API ADEME ---
+    DEPT = "73"
+    PAGE_SIZE = 1200
+    ADEME_ENDPOINTS = {
+        "existants": "https://data.ademe.fr/data-fair/api/v1/datasets/dpe03existant/lines",
+        "neufs": "https://data.ademe.fr/data-fair/api/v1/datasets/dpe02neuf/lines"
+    }
+
+    new_frames = []
+    total_new_rows = 0
+
+    for label, url in ADEME_ENDPOINTS.items():
+        print(f"\n--- Téléchargement {label.upper()} ---")
+        params = {
+            "q": f"{DEPT}*",
+            "q_fields": "code_postal_ban",
+            "qs": f"date_reception_dpe:[{last_date_str} TO *]",
+            "size": PAGE_SIZE,
+            "sort": "date_reception_dpe"
+        }
+
+        try:
+            r = requests.get(url, params=params, timeout=120)
+            r.raise_for_status()
+            data = r.json()
+            results = data.get("results", [])
+            if not results:
+                print(f"[INFO] Aucun nouveau DPE pour {label}")
+                continue
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Erreur API ADEME ({label}) : {e}")
+
+        df_new = pd.DataFrame(results)
+        df_new["Logement"] = "Ancien" if label == "existants" else "Neuf"
+        total_new_rows += len(df_new)
+
+        # --- Harmonisation des colonnes ---
+        # Garde uniquement les colonnes déjà présentes dans le dataset local
+        df_new = df_new.reindex(columns=st_cols, fill_value=pd.NA)
+        new_frames.append(df_new)
+        print(f"[INFO] {len(df_new)} nouvelles lignes récupérées pour {label}.")
+
+    # --- Vérification ---
+    if not new_frames:
+        return {"status": "no_update", "message": "Aucune donnée nouvelle détectée."}
+
+    df_new_all = pd.concat(new_frames, ignore_index=True)
+
+    # --- Fusion & Sauvegarde ---
+    df_final = pd.concat([df_local, df_new_all], ignore_index=True)
+    df_final.to_csv(DATA_PATH, index=False)
+
+    return {
+        "status": "ok",
+        "new_rows": int(total_new_rows),
+        "updated_until": str(df_final["date_reception_dpe"].max())[:10]
+    }
 # ------------------------------------------------------------
 # 🚀 Run local
 # ------------------------------------------------------------

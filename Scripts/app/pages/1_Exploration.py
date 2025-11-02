@@ -9,11 +9,56 @@ from app.utils.data_loader import load_data
 # ======================================================
 st.set_page_config(page_title="🔍 Exploration des données", layout="wide")
 st.title("🔍 Exploration des données DPE")
+# ======================================================
+# 🔁 Rafraîchissement des données ADEME
+# ======================================================
+
+import requests
+
+API_URL = "http://127.0.0.1:8000"  # à adapter selon ton déploiement local ou Render
+
+# --- Lecture de la dernière mise à jour ---
+try:
+    r = requests.get(f"{API_URL}/last_update", timeout=15)
+    if r.status_code == 200:
+        last_date = r.json().get("last_update", "Non disponible")
+    else:
+        last_date = "Non disponible"
+except Exception:
+    last_date = "Non disponible"
+
+with st.container(border=True):
+    st.markdown("### 🗓️ Données ADEME locales")
+    st.markdown(f"**Dernière mise à jour enregistrée :** `{last_date}`")
+
+    if st.button("🔁 Rafraîchir les données depuis l’ADEME"):
+        with st.spinner("⏳ Mise à jour en cours... (cela peut prendre quelques minutes)"):
+            try:
+                res = requests.post(f"{API_URL}/refresh_data", timeout=600)
+                if res.status_code == 200:
+                    payload = res.json()
+                    if payload["status"] == "ok":
+                        st.success(
+                            f"✅ {payload['new_rows']} nouvelles lignes ajoutées "
+                            f"(dernière date : {payload['updated_until']})."
+                        )
+                        st.rerun()
+                    else:
+                        st.info("ℹ️ Aucune nouvelle donnée trouvée (déjà à jour).")
+                else:
+                    st.error(f"Erreur {res.status_code}")
+                    st.code(res.text)
+            except Exception as e:
+                st.error(f"❌ Erreur de connexion à l’API : {e}")
 
 # ======================================================
 # CHARGEMENT DES DONNÉES
 # ======================================================
 df = load_data()
+if "date_reception_dpe" in df.columns:
+    df["date_reception_dpe"] = pd.to_datetime(df["date_reception_dpe"], errors="coerce").dt.date
+    df = df.sort_values("date_reception_dpe", ascending=False)
+
 
 # ======================================================
 # SECTION FILTRES
