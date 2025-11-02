@@ -1,33 +1,29 @@
-# ==========================================================
-# 🐍 Image de développement Streamlit + Flask (Python 3.12)
-# Légère, optimisée pour le dev, compatible prod
-# ==========================================================
+# ===========================================================
+# 🐳 Dockerfile de production pour l'app Streamlit DPE 71
+# ===========================================================
 FROM python:3.12-slim
 
-# Empêche Python de créer des fichiers .pyc et force un flush stdout
+# Empêche la création de fichiers pyc et force le flush stdout
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Définir le dossier de travail
 WORKDIR /app
 
-# Installer les dépendances système nécessaires à certaines libs (scikit-learn, numpy, etc.)
+# Installer dépendances système
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    libgomp1 \
-    && rm -rf /var/lib/apt/lists/*
+    libgomp1 && rm -rf /var/lib/apt/lists/*
 
-# Copier uniquement requirements.txt (pour profiter du cache Docker)
+# Copier et installer les dépendances Python
 COPY requirements.txt /app/
-
-# Installer les dépendances Python
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copier le reste du projet
-COPY . /app
+# Copier le code, les modèles et les données nécessaires
+COPY Scripts/app /app/Scripts/app
+COPY models /app/models
+COPY data /app/data
 
-# Exposer le port utilisé par Streamlit
+# Exposer le port Streamlit
 EXPOSE 8501
 
-# Lancer Streamlit en mode dev (auto reload)
-CMD ["streamlit", "run", "Scripts/app/main.py", "--server.address=0.0.0.0", "--server.port=8501", "--server.runOnSave=true"]
+# Commande de lancement
+CMD ["streamlit", "run", "Scripts/app/main.py", "--server.address=0.0.0.0", "--server.port=8501"]

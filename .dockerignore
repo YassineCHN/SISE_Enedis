@@ -1,0 +1,16 @@
+# === Éléments inutiles dans l'image finale ===
+Notebooks/
+Documentation/
+Documentations/
+__pycache__/
+.git/
+.gitignore
+arbo.txt
+
+# === Fichiers temporaires ou personnels ===
+*.ipynb
+*.log
+*.zip
+*.tar
+*.tmp
+*.bak
