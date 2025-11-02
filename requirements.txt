@@ -27,3 +27,8 @@ Pillow>=9.4,<10.1
 json5==0.10.0
 pyproj>=3.6.0
 ipykernel>=6.0
+
+# --- API moderne ---
+fastapi==0.115.2
+uvicorn==0.31.1
+pydantic==2.8.2

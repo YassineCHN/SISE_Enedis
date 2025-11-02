@@ -7,6 +7,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import joblib, os, glob
+import requests
 
 st.set_page_config(page_title="Prédictions", page_icon="⚡", layout="wide")
 
