@@ -1,0 +1,22 @@
+name: dpe-streamlit-app
+services:
+  - name: dpe-streamlit
+    type: web
+    ports:
+      - 8501
+    routes:
+      - path: /
+    build_from_source: true
+    dockerfile_path: ./Dockerfile
+    volumes:
+      - name: data-volume
+        mount_path: /app/data
+      - name: models-volume
+        mount_path: /app/models
+    env:
+      - key: HF_TOKEN
+        value: ${HF_TOKEN}    # (facultatif si dataset public)
+      - key: STREAMLIT_SERVER_PORT
+        value: "8501"
+      - key: PYTHONUNBUFFERED
+        value: "1"
