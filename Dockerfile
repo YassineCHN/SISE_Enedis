@@ -1,9 +1,9 @@
 # ===========================================================
-# 🐳 Dockerfile de production pour Streamlit (Koyeb)
+# 🐳 Dockerfile combiné : FastAPI + Streamlit + Hugging Face
 # ===========================================================
 FROM python:3.12-slim
 
-# Éviter les fichiers .pyc et activer stdout direct
+# Empêcher création de .pyc et forcer sortie stdout immédiate
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
@@ -13,22 +13,27 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgomp1 && rm -rf /var/lib/apt/lists/*
 
-# Copier et installer les dépendances Python
+# Copier les dépendances Python
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt huggingface_hub
 
-# Copier le code de l’application (sans data/models)
-COPY Scripts/app /app/Scripts/app
+# Installer toutes les dépendances nécessaires à Streamlit + FastAPI + modèles
+RUN pip install --no-cache-dir -r requirements.txt \
+    fastapi uvicorn streamlit joblib pandas scikit-learn plotly huggingface_hub requests
 
-# Créer les dossiers persistants pour données et modèles
+# Copier tout le projet (API, scripts, data, models, etc.)
+COPY . .
+
+# Créer les dossiers persistants
 VOLUME ["/app/data", "/app/models"]
 
-# Copier le script d’amorçage Hugging Face
-COPY init_assets.py /app/init_assets.py
-
-# Exposer le port Streamlit
+# Exposer les deux ports
+EXPOSE 8000
 EXPOSE 8501
 
-# Télécharger les fichiers Hugging Face au démarrage,
-# puis lancer l'application Streamlit
-CMD ["bash", "-c", "python init_assets.py && streamlit run Scripts/app/main.py --server.address=0.0.0.0 --server.port=8501"]
+# Commande de démarrage :
+# - Télécharge les fichiers depuis Hugging Face (init_assets.py)
+# - Lance l'API (port 8000)
+# - Lance Streamlit (port 8501)
+CMD ["bash", "-c", "python init_assets.py && \
+    uvicorn api.main:app --host 0.0.0.0 --port 8000 & \
+    streamlit run Scripts/app/main.py --server.address=0.0.0.0 --server.port=8501"]
