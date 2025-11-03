@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 import joblib, os
 
-from config import MODEL_DPE_PATH, MODEL_CONSO_PATH
+from api.config import MODEL_DPE_PATH, MODEL_CONSO_PATH
 from models_loader import load_model
 from schemas import InputFeatures
 from utils import normalize_input
