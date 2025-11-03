@@ -2,85 +2,132 @@
 
 ## Présentation du projet
 
-**GreenTech Solutions** est une application web interactive combinant **Streamlit** (front-end) et **FastAPI** (back-end), déployée sur **Koyeb**.  
-Elle permet d’explorer les données du **Diagnostic de Performance Énergétique (DPE)**, d’analyser les tendances de consommation, et de prédire la **classe énergétique** et la **consommation d’un logement**.
+**GreenTech Solutions** est une application web interactive combinant **Streamlit** (interface utilisateur) et **FastAPI** (API de prédiction), déployée sur **Koyeb**.  
+Elle permet d’explorer les données du **Diagnostic de Performance Énergétique (DPE)** (ADEME), d’analyser la consommation énergétique des logements et de **prédire la classe DPE et la consommation estimée** d’un logement.
 
-**URL de déploiement :** *(à insérer ici une fois l’app en ligne)*  
-**Dépôt GitHub :** [m2_enedis](https://github.com/…)
+**URL de déploiement :** appstreamlit.koyeb.app
+**Dépôt GitHub :** https://github.com/YassineCHN/SISE_Enedis
 
 ---
 
 ## Navigation et pages principales
 
-### 🏠 Page "Contexte"
-**Intérêt :** Introduction du projet, contexte environnemental, objectifs de sobriété énergétique et aperçu du dataset ADEME.  
-**Fonctionnalités :**
-- Présentation de la base DPE Savoie (73)  
-- Indicateurs clés (nombre de logements, répartition A–G, surface moyenne, etc.)  
-- Aperçu des sources OpenData (ADEME, Enedis, data.gouv.fr)
+### 🏠 Contexte
+**Objectif** : Introduire le projet, son cadre (sobriété énergétique) et les jeux de données ADEME.  
+**Utilisation** : Page d’accueil explicative.
 
 ---
 
-### 🔍 Page "Exploration"
-**Intérêt :** Permet à l’utilisateur de **filtrer et explorer** les données brutes issues du DPE.  
-**Fonctionnalités :**
-- Filtres dynamiques (code postal, type de bâtiment, période de construction, énergie, etc.)  
-- Graphiques interactifs avec **Plotly** : histogrammes, boxplots, barres, nuages de points  
-- Export des graphiques en **PNG** et des données filtrées en **CSV**  
-**Utilisation :**
-> Sélectionner les filtres d’intérêt, puis explorer les tendances énergétiques à travers les graphiques interactifs.
+### 📊 Exploration
+**Objectif** : Explorer le dataset ADEME nettoyé pour la **Savoie (73)**.  
+**Fonctionnalités** :
+- Chargement du fichier `donnees_dpe_73_clean.csv`
+- Filtres : code postal, type de bâtiment, période de construction, énergie de chauffage
+- Visualisations interactives (**Plotly**) : histogrammes, barres, scatter, boxplots
+- Export : graphiques **PNG** et données filtrées **CSV**
+
+**Utilisation** : Choisir les filtres (sidebar) → visuels mis à jour en temps réel.
 
 ---
 
-### 📊 Page "Analyse statistique"
-**Intérêt :** Offrir des analyses croisées entre variables du DPE et indicateurs énergétiques.  
-**Exemples de graphiques :**
-- Consommation moyenne par classe DPE  
-- Distribution de surface et période de construction  
-- Corrélation entre type d’énergie et émissions GES  
-**Utilisation :**
-> Observer les corrélations clés pour comprendre l’impact des caractéristiques du logement sur la performance énergétique.
+### 📈 Analyse Statistique
+**Objectif** : Étudier les relations entre caractéristiques des logements et performances énergétiques.  
+**Fonctionnalités** :
+- Corrélations : énergie ↔ consommation, période ↔ DPE, surface ↔ GES
+- Graphiques Plotly (zoom, survol, export)
+
+**Utilisation** : Identifier tendances globales et variables influentes.
 
 ---
 
-### 🗺️ Page "Cartographie"
-**Intérêt :** Visualiser les logements du département sur une **carte interactive** (Folium + Streamlit Folium).  
-**Fonctionnalités :**
-- Localisation par latitude/longitude (converties depuis Lambert93)  
-- Filtres par classe DPE, énergie, période de construction  
-- Zoom, navigation, survol pour détails  
-**Utilisation :**
-> Naviguer dans la carte pour visualiser la distribution géographique des classes DPE et des consommations.
+### 🗺️ Cartographie
+**Objectif** : Visualiser la répartition géographique des logements.  
+**Fonctionnalités** :
+- Carte **Folium** intégrée à Streamlit
+- Conversion géographique **Lambert93 → WGS84**
+- Filtres : classe DPE, période, type de bâtiment
+- Navigation (zoom, clic) et **export image**
+
+**Utilisation** : Explorer zones performantes vs énergivores.
 
 ---
 
-### 🤖 Page "Prédiction"
-**Intérêt :** Simuler la **classe énergétique** (A–G) et la **consommation annuelle (kWh/m²/an)** d’un logement selon ses caractéristiques.  
-**Fonctionnalités :**
-- Formulaire de saisie :
-  - Type de logement, surface, énergie, année de construction, isolation, etc.  
-- Affichage instantané des résultats :
-  - Étiquette DPE prédite  
-  - Consommation estimée  
-  - Éligibilité **MaPrimeRénov**
-- Graphiques de comparaison avec le parc local
-**Utilisation :**
-> Remplir les champs du formulaire et cliquer sur **“Lancer la prédiction”** pour obtenir les estimations.
+### 🤖 Prédiction
+**Objectif** : Simuler **classe DPE (A–G)** et **consommation (kWh/m²/an)**.  
+**Formulaire** :
+- Type (maison/appartement), surface, période/année de construction
+- Énergie de chauffage
+- Logement traversant (Oui/Non), qualité d’isolation
+
+**Modèles** :
+- **Classification DPE** : Random Forest Classifier  
+- **Régression conso** : Random Forest Regressor
+
+**Résultats** :
+- Classe DPE prédite + badge “Passoire” (F–G)
+- Consommation estimée
+- Indication **MaPrimeRénov** (éligibilité simple)
 
 ---
 
-### ⚙️ Page "API"
-**Intérêt :** Documentation interactive de l’API **FastAPI** utilisée par l’application.  
-**Fonctionnalités :**
-- Accès direct à la documentation auto-générée Swagger (`/docs`)  
-- Endpoints disponibles :
-  - `/predict_dpe` → prédiction de la classe DPE  
-  - `/predict_conso` → prédiction de la consommation énergétique  
-- Exemple de requête JSON :
-  ```json
-  {
-    "surface_habitable_logement": 85,
-    "type_batiment": "maison",
-    "type_energie_principale_chauffage": "electricite",
-    "periode_construction": "1971 - 1980"
-  }
+### ⚙️ API
+**Objectif** : Exposer les modèles via **FastAPI**.  
+**Fonctionnalités** :
+- Documentation interactive Swagger : `/docs`
+- Endpoints : `/predict_dpe`, `/predict_conso`
+- Exemple de payload :
+```json
+{
+  "surface_habitable_logement": 85,
+  "type_batiment": "maison",
+  "type_energie_principale_chauffage": "electricite",
+  "periode_construction": "1971 - 1980",
+  "logement_traversant": "non"
+}
+```
+
+---
+
+### 👤 À propos
+**Contenu** : Liens GitHub, auteurs/roles (chef de projet, dev, data scientist), liens doc technique & rapport d’étude.
+
+---
+
+## Fonctionnalités majeures
+
+| Catégorie | Détails |
+|---|---|
+| Multi-pages Streamlit | Contexte, Exploration, Analyse, Cartographie, Prédiction, API |
+| Visualisations | Plotly (interactif) & Folium (cartes) |
+| Filtres dynamiques | Actualisation immédiate |
+| Export | CSV (données filtrées), PNG (graphiques/carte) |
+| API | `/predict_dpe` et `/predict_conso` |
+| ML intégré | Random Forest (classif & régression) |
+| Déploiement | Docker/Koyeb prêt |
+
+---
+
+## Cas d’usage typiques
+
+| Objectif | Action | Résultat |
+|---|---|---|
+| Explorer les DPE | Onglet **Exploration** | Graphiques filtrables |
+| Comprendre la conso | Onglet **Analyse** | Corrélations et tendances |
+| Voir la répartition | Onglet **Cartographie** | Carte interactive |
+| Simuler un logement | Onglet **Prédiction** | DPE & conso estimés |
+| Tester l’API | Onglet **API** | Requêtes JSON live |
+
+---
+
+## Évolutions prévues
+- MAJ automatique des données via API ADEME  
+- Réentraînement des modèles depuis l’interface  
+- Mode “avant/après travaux” (comparaison scénarios)  
+- Profils utilisateurs (sauvegarde scénarios)
+
+---
+
+**Auteur** : Yassine CHENIOUR - Mohamed Habib BAH - Perrine IBOUROI
+**Date** : Octobre 2025  
+**Version** : 1.0  
+**Licence** : Usage académique – Master 2 SISE
