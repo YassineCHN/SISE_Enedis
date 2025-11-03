@@ -1,71 +1,150 @@
-# SISE_Enedis
+# 🌿 GreenTech Solutions – France Énergie
+> [!NOTE]
+> Projet académique réalisé dans le cadre du Master 2 SISE (2025).
 
-## À propos
-Cette aplication a pour but de prédire une étiquette de diagnostic de performance énergétique ainsi que la consommation énergétique totale d'un logement.
-Elle se base sur les données issues de l'ADEME https://data.ademe.fr/datasets et filtrées sur le département du Rhône.
+---
 
-## Table des matières  
-- [Installation](#installation)  
-- [Structure du projet](#structure-du-projet)  
-- [Utilisation](#utilisation)  
-- [Données](#données)  
-- [Contribuer](#contribuer)
-- [Auteurs](#auteurs)
+## Présentation
+### 🔗 Live : [GreenTech Solutions sur Koyeb](https://appstreamlit.koyeb.app/) 
 
+**GreenTech Solutions** est une application web interactive combinant **Streamlit** (interface utilisateur) et **FastAPI** (backend de prédiction).  
+Elle permet d'explorer et d'analyser les données du **Diagnostic de Performance Énergétique (DPE)** et de **prédire la classe énergétique (A–G)** ainsi que la **consommation énergétique (kWh/m²/an)** d’un logement.
 
+L’application vise à :
+- Mieux comprendre la performance énergétique des logements français,
+- Accompagner la transition énergétique et la sobriété,
+- Sensibiliser aux aides comme **MaPrimeRénov’**.
 
-## Installation
-Ces informations sont disponibles dans la [documentation technique](https://github.com/YassineCHN/SISE_Enedis/tree/main/Documentations).
+---
 
-#### 1. Cloner le dépôt :
-git clone https://github.com/YassineCHN/SISE_Enedis.git
-cd SISE_Enedis  
-#### 2. Créer un environnement virtuel: 
-python -m venv venv
-source venv/bin/activate 
-#### 3. Installer les dépendances:
-pip install -r requirements.txt
+## 🖥️ Aperçu de l’application
 
-## Structure du projet
-Voici une présentation de la structure du projet:
-
-SISE_Enedis/
-
-├── data/               *# Jeux de données*  
-├── Notebooks/          *# Notebooks Jupyter d’analyse exploratoire*  
-├── Scripts/            *# Scripts Python pour traitement, modélisation, interface*  
-├── Modèle/             *# Fichiers relatifs au modèle (par ex. model.py)*  
-├── Documentations/     *# Documentation, manuel utilisateur, guide Git*  
-├── api.py              *# Module API (si l’application utilise une API)*  
-├── requirements.txt    *# Liste des dépendances Python*  
-└── README.md           *# Ce fichier*
+### Page d’accueil – Contexte & Page Prédiction – Simulation énergétique
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/288971bc-38c0-4e3c-9571-30e35b618f90" alt="Capture 1" width="48%" />
+  <img src="https://github.com/user-attachments/assets/00c7d24f-3fd6-4d2d-a0db-3666c40619b8" alt="Capture 2" width="48%" />
+</p>
 
 
-Le lancement de l'application se fait via le fichier app.py contenu dans le dossier Scripts
+---
 
-## Utilisation
-Activez votre environnement virtuel dans lequel vous avez installé les dépendances contenues dans requirements.txt. 
-Ensuite, dans le terminal, lancez l'application via la commande `streamlit run app.py` (si vous vous trouvez bien à l'emplacement du fichier app.py, sinon indiquez le chemin absolu)
+## ⚙️ Technologies utilisées
 
-## Données 
-Les données utilisées proviennent de l'ADEME. Une requête via l'API de l'Ademe a permis de stocker les données sous format .csv. Les données peuvent être rafraîchies via l'application directement.
+| Composant | Technologie |
+|------------|--------------|
+| Frontend | **Streamlit** |
+| Backend | **FastAPI** |
+| Modélisation | **Scikit-learn**, **Pandas**, **Joblib** |
+| Visualisation | **Plotly**, **Folium**, **Streamlit Folium** |
+| Données géographiques | **PyProj** (conversion Lambert93 → WGS84) |
+| Déploiement | **Docker**, **Koyeb** |
 
-## Contribuer 
-Les contributions sont les bienvenues. 
-Pour cela : 
+---
 
-1- Forkez ce dépôt.
+## 📊 Sources de données
 
-2- Créez une branche : git checkout -b feature/ma‑nouvelle‑fonctionnalité
+Les données proviennent des APIs officielles :  
+- [ADEME – DPE existants](https://data.ademe.fr/datasets/dpe03existant)  
+- [ADEME – DPE neufs](https://data.ademe.fr/datasets/dpe02neuf)  
 
-3- Faites vos modifications et commitez : git commit -m "Ajout de …"
+---
 
-4- Pushez : git push origin feature/ma‑nouvelle‑fonctionnalité
+## 🧰 Installation et exécution
 
-Ouvrez une Pull Request sur ce dépôt.
-Veuillez aussi ajouter des tests/unités ou un notebook de démonstration si applicable.
+### 💻 En local
+1. Cloner le projet :
+   ```bash
+   git clone https://github.com/.../m2_enedis.git
+   cd m2_enedis
+   ```
+2. Créer et activer un environnement virtuel :
+   ```bash
+   python -m venv venv_enedis
+   venv_enedis\Scripts\activate
+   ```
+3. Installer les dépendances :
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Lancer l’API et l’application Streamlit (se placer dans le projet à la racine ENEDIS pour executer) :
+   ```bash
+   uvicorn api.main:app --reload
+   streamlit run Scripts/app/main.py
+   ```
+5. Accès :
+   - Application : [http://localhost:8501](http://localhost:8501)
+   - API Swagger : [http://localhost:8000/docs](http://localhost:8000/docs)
 
-## Auteurs
-- [YassineCHN](https://github.com/YassineCHN)
-- [Bahmohamedhabib](https://github.com/Bahmohamedhabib)
-- [perrineib](https://github.com/perrineib)
+---
+
+### 🐳 Avec Docker
+```bash
+# Construire l’image Docker
+docker build -t dpe-app .
+
+# Lancer le conteneur
+docker run -p 8000:8000 -p 8501:8501 dpe-app
+```
+- L’API est disponible sur le port `8000`
+- L’application Streamlit sur le port `8501`
+
+---
+
+## 📋 Cahier des charges
+
+L’avancement du projet respecte la quasi-totalité des exigences du cahier des charges initial.  
+Les fonctionnalités majeures (exploration, cartographie, prédiction, export, API, Docker) sont **fonctionnelles**.
+
+### État d’avancement
+<img width="1334" height="738" alt="image" src="https://github.com/user-attachments/assets/5938b80a-f26a-46dc-981a-e4b3f9be8cf6" />
+
+<img width="1347" height="754" alt="image" src="https://github.com/user-attachments/assets/5281aa8a-c8c1-496e-ae99-2b076e75ccf0" />
+
+
+### Suivi de projet – Taiga (remplaçant Azure DevOps)
+<img width="1912" height="915" alt="image" src="https://github.com/user-attachments/assets/7a859124-f187-4471-bb29-719721d55a5f" />
+
+
+> Bien que le suivi n’ait pas été exhaustif, le Kanban montre les principales étapes validées :  
+> création du repo, rédaction du rapport, documentation, dockerisation et déploiement.
+
+---
+
+## 📈 Modèles de Machine Learning intégrés
+
+| Modèle | Type | Objectif | Score principal |
+|---------|------|-----------|-----------------|
+| Random Forest Regressor | Régression | Prédiction consommation (kWh/m²/an) | R² = 0.72 |
+| Random Forest Classifier | Classification | Prédiction étiquette DPE (A–G) | Accuracy = 0.64 |
+| Random Forest Classifier | Binaire | Éligibilité MaPrimeRénov’ | AUC = 0.95 |
+
+Les modèles sont stockés dans le dossier `/models` et chargés automatiquement par **FastAPI**.
+
+---
+
+## 🧱 Structure du projet
+
+```
+m2_enedis/
+├── api/                  → Backend FastAPI
+├── Scripts/app/           → Application Streamlit
+│   ├── pages/             → Contexte, Exploration, Analyse, Cartographie, Prédiction, API
+│   ├── utils/             → Data loading, visualisation, preprocessing
+│   ├── assets/            → Images et icônes
+├── data/                  → Jeux ADEME nettoyés
+├── models/                → Modèles ML (.pkl)
+├── Notebooks/             → Collecte, préparation, modélisation
+├── Dockerfile             → Image combinée FastAPI + Streamlit
+├── koyeb.yaml             → Configuration de déploiement cloud
+└── README.md
+```
+
+---
+
+## 👥 Crédits
+
+**Projet réalisé par l’équipe GreenTech Solutions :**
+**Auteur** : Yassine CHENIOUR - Mohamed Habib BAH - Perrine IBOUROI
+**Date** : Octobre 2025  
+**Version** : 1.0  
+**Licence** : Usage académique – Master 2 SISE
