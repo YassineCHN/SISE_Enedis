@@ -9,8 +9,8 @@ import joblib, os
 
 from api.config import MODEL_DPE_PATH, MODEL_CONSO_PATH
 from api.models_loader import load_model
-from schemas import InputFeatures
-from utils import normalize_input
+from api.schemas import InputFeatures
+from api.utils import normalize_input
 import requests
 
 # ------------------------------------------------------------
