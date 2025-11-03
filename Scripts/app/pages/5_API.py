@@ -1,12 +1,8 @@
 # ============================================================
 # 🔌 PAGE 5 — API
-# Documentation et interface de test pour l'API FastAPI
-# ============================================================
-# ============================================================
-# 🔌 PAGE 5 — API
 # Documentation et interface de test pour l'API SISE_Enedis
 # ============================================================
-
+from app.utils.ui_style import apply_greentech_style
 import streamlit as st
 import requests
 import pandas as pd
@@ -14,6 +10,7 @@ import json
 import time
 
 st.set_page_config(page_title="API SISE_Enedis", page_icon="🔌", layout="wide")
+apply_greentech_style()
 
 # ---------- Small CSS ----------
 st.markdown("""

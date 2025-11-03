@@ -8,8 +8,10 @@ import pandas as pd
 import numpy as np
 import joblib, os, glob
 import requests
+from app.utils.ui_style import apply_greentech_style
 
 st.set_page_config(page_title="Prédictions", page_icon="⚡", layout="wide")
+apply_greentech_style()
 
 st.title("⚡ Simulation de performance énergétique")
 st.markdown(
@@ -256,27 +258,4 @@ if predict_btn:
             else "Ce logement **n’est pas éligible** à MaPrimeRénov’ car sa classe DPE est supérieure à D."
         ) + "_")
 
-    # ============================================================
-    # 🧩 Mode Debug
-    # ============================================================
-    debug_mode = st.toggle("🧠 Activer le mode debug")
 
-    if debug_mode:
-        st.markdown("---")
-        st.subheader("🔍 Détails techniques (Debug)")
-        st.write("**Valeur brute DPE (y_raw)** :", y_raw_dpe)
-        st.write("**Mapping classes → lettres** :", dpe_map)
-        st.write("**Étiquette DPE finale** :", etiquette)
-        st.write("**Prédiction MPR (0=Non,1=Oui)** :", int(y_pred_mpr) if y_pred_mpr is not None else None)
-        st.write("**Prédiction consommation (kWh/m²/an)** :", round(float(y_pred_conso), 2) if y_pred_conso is not None else None)
-
-        # 🔎 Vérification des catégories
-        if schema_dpe["categories"]:
-            st.markdown("**Vérification des catégories connues (DPE)**")
-            for feat in schema_dpe["cat"]:
-                vals = schema_dpe["categories"].get(feat, [])
-                val_in = X_input.iloc[0][feat]
-                if val_in not in vals:
-                    st.warning(f"⚠️ Valeur hors vocabulaire pour `{feat}` : `{val_in}`")
-                else:
-                    st.success(f"✅ `{feat}` ok : {val_in}")

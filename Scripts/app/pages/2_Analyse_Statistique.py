@@ -3,11 +3,13 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from app.utils.data_loader import load_data
+from app.utils.ui_style import apply_greentech_style
 
 # ======================================================
 # CONFIGURATION DE LA PAGE
 # ======================================================
 st.set_page_config(page_title="📊 Analyse et visualisation", layout="wide")
+apply_greentech_style()
 st.title("📊 Analyse et visualisation des données DPE")
 
 # ======================================================

@@ -5,11 +5,13 @@ import folium
 from folium.plugins import MarkerCluster
 from streamlit_folium import st_folium
 from app.utils.data_loader import load_data
+from app.utils.ui_style import apply_greentech_style
 
 # ======================================================
 # CONFIGURATION
 # ======================================================
 st.set_page_config(page_title="🗺️ Cartographie DPE", layout="wide")
+apply_greentech_style()
 st.title("🗺️ Cartographie interactive des logements DPE")
 
 df = load_data()
