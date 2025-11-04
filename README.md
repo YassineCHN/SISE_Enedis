@@ -54,8 +54,8 @@ Les données proviennent des APIs officielles :
 ### 💻 En local
 1. Cloner le projet :
    ```bash
-   git clone https://github.com/.../m2_enedis.git
-   cd m2_enedis
+   git clone https://github.com/.../SISE_ENEDIS.git
+   cd SISE_ENEDIS
    ```
 2. Créer et activer un environnement virtuel :
    ```bash
@@ -128,7 +128,7 @@ Les modèles sont stockés dans le dossier `/models` et chargés automatiquement
 ## 🧱 Structure du projet
 
 ```
-m2_enedis/
+SISE_ENEDIS/
 ├── api/                  → Backend FastAPI
 ├── Scripts/app/           → Application Streamlit
 │   ├── pages/             → Contexte, Exploration, Analyse, Cartographie, Prédiction, API
