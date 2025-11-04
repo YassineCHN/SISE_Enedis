@@ -13,7 +13,7 @@ Elle permet d'explorer et d'analyser les données du **Diagnostic de Performance
 L’application vise à :
 - Mieux comprendre la performance énergétique des logements français,
 - Accompagner la transition énergétique et la sobriété,
-- Sensibiliser aux aides comme **MaPrimeRénov’**.
+- Sensibiliser aux aides comme **MaPrimeRénov’** (aide versée par l’Agence nationale de l’habitat (Anah) pour les rénovations de logements trop consommateur : E,F,G).
 
 ---
 
