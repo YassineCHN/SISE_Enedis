@@ -7,15 +7,8 @@ Elle est conteneurisée via **Docker** et déployée sur la plateforme **Koyeb**
 
 ### Vue d’ensemble
 
-```text
-Utilisateur ↔ Streamlit (Frontend)
-             ↕
-          FastAPI (Backend)
-             ↕
-   Modèles ML (.pkl - Random Forest)
-             ↕
-   Données ADEME (CSV - DPE existants/neufs)
-```
+<img width="1920" height="1080" alt="M2SIA- Diapo soutenance  (1)" src="https://github.com/user-attachments/assets/5542a144-19c7-4909-b1fb-6d6650529701" />
+
 
 ### Répartition des composants
 
@@ -25,6 +18,8 @@ Utilisateur ↔ Streamlit (Frontend)
 | `Scripts/app/` | Application Streamlit (frontend) avec les pages et les utilitaires |
 | `models/` | Modèles ML sauvegardés (`.pkl`) |
 | `data/` | Jeux de données ADEME nettoyés (CSV) |
+| `Hugging Face` | Stockage des datasets et modèles pour les rendre accessibles par l'app koyeb |
+| `volume` | Stockage persistant des datasets et modèles sur koyeb |
 | `Notebooks/` | Scripts de modélisation (collecte, préparation, entraînement) |
 | `Dockerfile` | Image combinée Streamlit + FastAPI |
 | `koyeb.yaml` | Configuration de déploiement sur Koyeb |
@@ -227,20 +222,122 @@ services:
 
 ---
 
-## 6. Schéma d’architecture
+## 6. Schéma d’architecture – GreenTech Solutions
 
-L’illustration ci-dessous représente l’architecture globale du projet.
-
-![Architecture GreenTech Solutions](architecture_greentech.png)
-
-### Description du flux :
-1. L’utilisateur interagit via **Streamlit**
-2. Les requêtes de prédiction sont envoyées à **FastAPI**
-3. FastAPI charge les modèles `.pkl` pour l’inférence
-4. Les résultats sont renvoyés à Streamlit pour affichage
-5. L’application est conteneurisée et déployée sur **Koyeb**
+L’architecture globale du projet **GreenTech Solutions** combine un pipeline **ETL complet**, un module de **modélisation Machine Learning**, et une **application web conteneurisée** (Streamlit + FastAPI) déployée sur **Koyeb**.  
+Elle intègre également **Hugging Face** pour le stockage distant et la synchronisation automatique des modèles et jeux de données.
+L’ensemble est conteneurisé via **Docker** et déployé sur **Koyeb**.
 
 ---
+
+### 🧩 6.1 – Pipeline ETL (Collecte, Transformation, Modélisation)
+
+Ce premier schéma illustre le processus complet de préparation des données et d’entraînement des modèles :
+
+1. **Collecte (Extract)**  
+   - En début de script on attribue (manuellement) une valeur d'un nombre entier à la variable DEPT_CODE (qui dans le schéma est appelé "dept")  afin de choisir le département que l'on veut récupérer
+   - Récupération des DPE *existants* et *neufs* via les **API publiques ADEME** (`dpe03existant`, `dpe02neuf`) à l’aide de `requests` et `pandas` sur le DEPT_CODE renseigné. 
+   - Export en CSV (`donnees_dpe_[dept]_existants.csv`, `donnees_dpe_[dept]_neufs.csv`).
+
+2. **Transformation (Transform)**  
+   - Nettoyage, fusion, ajout de colonnes, conversion des coordonnées (Lambert93 → WGS84).
+   - Production du fichier propre `donnees_dpe_[dept]_clean.csv`.
+
+3. **Modélisation et entraînement (Load/Restitution)**  
+   - Entraînement des modèles de **régression** (consommation énergétique) et de **classification** (étiquette DPE, éligibilité MaPrimeRénov’)  
+   - Sauvegarde des modèles au format `.pkl` :  
+     - `model_CONSO_Random_Forest.pkl`  
+     - `model_DPE_Random_Forest.pkl`  
+     - `model_MPR_Random_Forest.pkl`
+
+4. **Publication sur Hugging Face (Synchronisation)**  
+   - Les fichiers modèles et datasets nettoyés sont **envoyés sur le dépôt Hugging Face** pour être accessibles publiquement lors du déploiement sur Koyeb.  
+   - Hugging Face agit comme **stockage distant partagé** entre l’environnement local et le cloud.
+
+📘 **Notebooks concernés :**  
+`collect_data_api.ipynb`, `prepare_data.ipynb`, `regression_new.ipynb`, `classification_new.ipynb`
+
+🧠 **Technos principales :** `pandas`, `numpy`, `pyproj`, `scikit-learn`, `joblib`, `huggingface_hub`
+
+📊 **Schéma ETL :**
+<img width="1920" height="1080" alt="M2SIA- Diapo soutenance  (3)" src="https://github.com/user-attachments/assets/6a3a333e-0308-4f06-9f65-86670c8cf133" />
+
+---
+
+### 💻 6.2 – Architecture applicative (Streamlit + FastAPI)
+
+L’application combine une interface utilisateur **Streamlit** et un backend **FastAPI**.  
+Les deux sont lancés simultanément dans le même conteneur Docker.
+
+- **Streamlit** pour le front-end interactif (multi-pages)
+- **FastAPI** pour le back-end de prédiction
+
+**Fonctionnement général :**
+1. L’utilisateur interagit avec Streamlit à travers plusieurs pages :  
+   `/Contexte`, `/Exploration`, `/Analyse`, `/Cartographie`, `/Prédiction`, `/API`, `/Profil`
+2. Lorsqu’une prédiction est demandée, Streamlit envoie une requête HTTP à FastAPI.
+3. FastAPI charge les modèles `.pkl` et renvoie les résultats à Streamlit pour affichage.
+
+**Chargement des modèles :**
+- Au démarrage du conteneur, un script (`init_assets.py`) télécharge automatiquement les modèles et jeux de données depuis **Hugging Face** si absents du volume local.  
+- Les fichiers sont ensuite placés dans `/app/models` et `/app/data`.
+
+**Endpoints FastAPI principaux :**
+| Méthode | Endpoint | Description |
+|----------|-----------|-------------|
+| `GET` | `/status` | Vérifie la disponibilité du service |
+| `GET` | `/last_update` | Indique la date de dernière mise à jour des modèles |
+| `GET` | `/predict_sample` | Fournit un exemple de prédiction |
+| `POST` | `/predict_all` | Réalise une prédiction complète (DPE, consommation, MaPrimeRénov’) |
+
+🌐 **Ports utilisés :**
+- `8501` → Streamlit  
+- `8000` → FastAPI  
+
+📘 **Dossiers concernés :**
+- `/Scripts/app/` → Interface Streamlit (frontend)  
+- `/api/` → API FastAPI (backend)  
+- `/models/` → Modèles ML `.pkl`  
+- `/data/` → Données ADEME nettoyées
+
+📊 **Schéma application :**
+<img width="1920" height="1080" alt="M2SIA- Diapo soutenance " src="https://github.com/user-attachments/assets/4a6f9d5c-b203-4b48-95dc-46a41b10803b" />
+
+---
+
+### ☁️ 6.3 – Déploiement global (Docker + Koyeb + Hugging Face)
+
+L’ensemble de la solution est conteneurisé et déployé sur la plateforme **Koyeb** à l’aide du `Dockerfile` et du fichier `koyeb.yaml`.
+
+**Étapes de fonctionnement :**
+
+1. **Construction Docker** : le Dockerfile crée une image contenant Streamlit, FastAPI et les dépendances ML.  
+2. **Synchronisation avec Hugging Face** : lors du démarrage, les modèles et données sont automatiquement téléchargés dans les volumes `/app/data` et `/app/models`.  
+3. **Déploiement Koyeb** : la plateforme lance le conteneur, expose les ports 8501 (Streamlit) et 8000 (FastAPI) et monte les volumes persistants.  
+4. **Accès utilisateur** : via l’URL publique Koyeb.
+
+📦 **Technos clés :** `Docker`, `Koyeb`, `Hugging Face`, `FastAPI`, `Streamlit`
+
+📊 **Schéma global :**
+<img width="1920" height="1080" alt="M2SIA- Diapo soutenance  (1)" src="https://github.com/user-attachments/assets/5542a144-19c7-4909-b1fb-6d6650529701" />
+
+---
+
+### 🔁 Résumé des interactions
+
+| Étape | Entrées | Sorties | Technologies |
+|--------|----------|----------|---------------|
+| Collecte | API ADEME | CSV bruts | `requests`, `pandas` |
+| Préparation | CSV bruts | `donnees_dpe_clean.csv` | `pandas`, `pyproj` |
+| Modélisation | CSV clean | `.pkl` (modèles ML) | `scikit-learn`, `joblib` |
+| Publication | `.pkl` + CSV clean | Hugging Face Hub | `huggingface_hub` |
+| Application | `.pkl` + données | Interface Streamlit + API | `Streamlit`, `FastAPI` |
+| Déploiement | Dockerfile + volumes | Service web Koyeb | `Docker`, `Koyeb` |
+
+---
+
+💡 *Hugging Face sert ici de pont entre l’environnement local et le cloud : les modèles et datasets sont centralisés et synchronisés automatiquement lors du déploiement.*
+
 
 ## 7. Bonnes pratiques
 - Conserver la cohérence des versions de `scikit-learn` entre entraînement et production.  
