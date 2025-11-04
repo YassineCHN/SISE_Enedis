@@ -89,6 +89,9 @@ docker run -p 8000:8000 -p 8501:8501 dpe-app
 - L’application Streamlit sur le port `8501`
 
 ---
+ℹ️ **Note :**  
+La description complète de l’image Docker publique (`yassinechn/dpe-app`) et les instructions de déploiement sont disponibles dans la  
+📄 **[Documentation technique – Section “Image Docker publique”](Documentation_technique.md)**.
 
 ## 📋 Cahier des charges
 
