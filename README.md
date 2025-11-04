@@ -146,7 +146,6 @@ SISE_ENEDIS/
 
 ## 👥 Crédits
 
-**Projet réalisé par l’équipe GreenTech Solutions :**
 **Auteur** : Yassine CHENIOUR - Mohamed Habib BAH - Perrine IBOUROI
 **Date** : Octobre 2025  
 **Version** : 1.0  
