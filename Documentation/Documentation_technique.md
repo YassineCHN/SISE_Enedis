@@ -1,77 +1,257 @@
-# Documentation technique de l'application
+# ⚙️ Documentation Technique – GreenTech Solutions
 
-## 1. Architecture de l'application 
+## 1. Architecture générale
 
-L'application est structurée de la façon suivante : 
+L’application **GreenTech Solutions** repose sur une architecture moderne combinant **Streamlit** pour l’interface utilisateur et **FastAPI** pour le backend de prédiction.  
+Elle est conteneurisée via **Docker** et déployée sur la plateforme **Koyeb**.
 
-- Frontend : géré par Streamlit. Framework python. Visualisation de l'application et interaction avec l'utilisateur.
+### Vue d’ensemble
 
-- Backend : géré par Flask. Intermédiaire entre le frontend et les modèles de machines learning (fichiers .pkl).
-  
-- Modèles : fichiers PKL. Ces fichiers contiennent les modèles de classification et de régression entraînés avec les données de l'Ademe. 
+```text
+Utilisateur ↔ Streamlit (Frontend)
+             ↕
+          FastAPI (Backend)
+             ↕
+   Modèles ML (.pkl - Random Forest)
+             ↕
+   Données ADEME (CSV - DPE existants/neufs)
+```
 
-- Données : fichiers CSV ou requête vers l'API de l'Ademe des diagnostics de performances énergétiques.
+### Répartition des composants
 
-  
+| Répertoire | Rôle principal |
+|-------------|----------------|
+| `api/` | API FastAPI : endpoints de prédiction et chargement des modèles |
+| `Scripts/app/` | Application Streamlit (frontend) avec les pages et les utilitaires |
+| `models/` | Modèles ML sauvegardés (`.pkl`) |
+| `data/` | Jeux de données ADEME nettoyés (CSV) |
+| `Notebooks/` | Scripts de modélisation (collecte, préparation, entraînement) |
+| `Dockerfile` | Image combinée Streamlit + FastAPI |
+| `koyeb.yaml` | Configuration de déploiement sur Koyeb |
 
-Schéma de l'architecture applicative:
+---
 
+## 2. Composants logiciels
 
+### 2.1 Backend – FastAPI
 
-![Architecture applicative](assets/Architecture_app.drawio.png)
+**Fichier principal :** `api/main.py`  
+**Objectif :** fournir des endpoints REST pour les prédictions de DPE et de consommation.
 
-## 2.  Installation de l'application 
+**Endpoints principaux :**
+| Endpoint | Méthode | Description |
+|-----------|----------|-------------|
+| `/predict_dpe` | POST | Prédiction de la classe énergétique (A–G) |
+| `/predict_conso` | POST | Prédiction de la consommation (kWh/m²/an) |
 
-### 1. Prérequis logiciels:
-- Python 3.11
-- GIT 
-- VSCode
+**Modules :**
+- `schemas.py` : Définition des schémas Pydantic pour valider les requêtes
+- `models_loader.py` : Chargement des modèles `.pkl` depuis le dossier `models/`
+- `utils.py` : Fonctions utilitaires
+- `config.py` : Paramètres d’initialisation
 
-### 2. Prérequis librairies
-Vous trouverez dans le fichier *requirement.txt* les librairies à installer pour lancer l'application. 
+**Librairies clés :** `fastapi`, `uvicorn`, `pydantic`, `joblib`, `scikit-learn`
 
-##### Visualisation :
-_Plotly_ : Graphiques interactifs (3D, cartes, dashboards, etc.)
+---
 
-_Folium_ : Création de cartes interactives basées sur Leaflet.js (affichage de points géographiques, itinéraires, etc.).
+### 2.2 Frontend – Streamlit
 
-_Seaborn_ : Visualisation statistique basée sur matplotlib — permet de créer des graphiques esthétiques simplement.
+**Point d’entrée :** `Scripts/app/main.py`  
+**Framework :** Streamlit multi-pages
 
+**Structure :**
+- `pages/` : contient les pages Contexte, Exploration, Analyse, Cartographie, Prédiction, API
+- `utils/` : fonctions partagées (préprocessing, visualisation, chargement des données)
+- `assets/` : images et icônes
+- `config.py` : paramètres généraux (thème, titre, favicon, etc.)
 
-##### Frameworks web:
+**Librairies principales :** `streamlit`, `plotly`, `streamlit_folium`, `pandas`, `folium`, `pyproj`
 
-_Flask_ : Micro-framework Python pour créer des applications web et des APIs légères.
+---
 
-_Flasgger_ : Extension de Flask permettant d’ajouter facilement une documentation Swagger/OpenAPI pour tester ses endpoints API via une interface web.
+## 3. Environnements et dépendances
 
-##### Application : 
-_Streamlit_ : Framework simple pour créer des applications web interactives.
+**Python :** 3.12  
+**Environnement virtuel :** `venv_enedis`
 
-_Streamlit-lottie_ : Permet d’intégrer des animations Lottie (JSON animés) dans une app Streamlit.
+### Fichier `requirements.txt`
+Inclut notamment :  
+`streamlit`, `fastapi`, `uvicorn`, `scikit-learn`, `pandas`, `numpy`, `plotly`, `folium`, `requests`, `joblib`, `pydantic`, `pyproj`.
 
-##### Cartographie :
+---
 
-_Streamlit-folium_ : Intégration de cartes Folium dans des applications Streamlit.
+## 4. Exécution du projet
 
-_Pyproj_ : Conversion de coordonnées géographiques et projections cartographiques.
+### En local
+```bash
+# 1. Activer l'environnement virtuel
+venv_enedis\Scripts\activate
 
-##### API:
+# 2. Lancer l'API
+uvicorn api.main:app --reload
 
-_Requests_ : Envoie des requêtes HTTP (GET, POST, etc.) à des APIs ou sites web.
+# 3. Lancer Streamlit
+streamlit run Scripts/app/main.py
+```
 
-_Requests-oauthlib_ :	Gère les authentifications OAuth (utile pour accéder à des APIs protégées).
+**URL locales :**
+- Streamlit : http://localhost:8501  
+- API FastAPI : http://localhost:8000/docs
 
-_Urllib3_ : Bibliothèque bas niveau pour les connexions HTTP, utilisée en interne par requests.
+---
+### 🚀 Exécuter le projet avec Docker
 
+Ce projet peut être lancé de **deux manières** :  
+1) **Construire l’image localement** à partir du Dockerfile  
+2) **Télécharger l’image publique** depuis Docker Hub
 
+---
 
-### 3. Installation
-- Faire un clône de l'application via la commande `git clone https://github.com/YassineCHN/SISE_Enedis`
-- Bibliothèques: Installer les bibliothèques contenues dans le fichier requirement.txt
-  Activer l'environnement qui va servir à lancer l'application, utiliser la commande `pip install -r chemin_absolu/requirements.txt` afin d'importer les librairies dans cet environnement.
-    
+#### 🧩 Prérequis
+- Docker installé (Windows/macOS/Linux)
+- Ports **8000** (API FastAPI) et **8501** (Streamlit) libres
 
-### 4. Exécution
-- Depuis le terminal, lancer l'application via la commande `streamlit run chemin_absolu/app.py`
+---
 
-     
+#### ✅ Option A — Construire l’image localement
+
+```bash
+# Se placer à la racine du projet (là où se trouve le Dockerfile)
+docker build -t dpe-app .
+
+# Lancer le conteneur
+docker run -p 8000:8000 -p 8501:8501 dpe-app
+```
+
+**Accès locaux :**
+- Streamlit : http://localhost:8501  
+- API FastAPI : http://localhost:8000/docs
+
+---
+
+#### ✅ Option B — Utiliser l’image publique (Docker Hub)
+
+[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-dpe--app-blue?logo=docker)](https://hub.docker.com/r/yassinechn/dpe-app)
+
+Téléchargez et lancez l’image **sans dépendances locales** :
+
+```bash
+# Télécharger l’image publique
+docker pull yassinechn/dpe-app:latest
+
+# Lancer le conteneur
+docker run -p 8000:8000 -p 8501:8501 yassinechn/dpe-app:latest
+```
+
+**Accès locaux :**
+- Streamlit : http://localhost:8501  
+- API FastAPI : http://localhost:8000/docs
+
+---
+
+#### 📦 Détails techniques de l’image
+
+| Élément | Valeur |
+|---|---|
+| **Image locale** | `dpe-app:latest` |
+| **Image publique** | `yassinechn/dpe-app:latest` |
+| **Base** | `python:3.12-slim` |
+| **Taille indicative** | ≈ 2.9 GB |
+| **Ports exposés** | `8000` (FastAPI), `8501` (Streamlit) |
+| **Volumes** | `/app/data`, `/app/models` |
+| **Compatibilité** | Windows / macOS / Linux |
+
+---
+
+#### 🛠️ Dépannage (FAQ rapide)
+
+- **Port déjà utilisé (Bind for 0.0.0.0:8000 failed)**  
+  → Arrêter le service qui occupe le port ou changer le mapping, ex. :  
+  ```bash
+  docker run -p 8080:8000 -p 8501:8501 dpe-app
+  ```
+  Accès API : http://localhost:8080/docs
+
+- **Rebuild nécessaire après modification du code**  
+  → Reconstruire l’image :  
+  ```bash
+  docker build -t dpe-app .
+  ```
+💡 *Cette image permet d’exécuter le projet complet
+---
+
+---
+
+### Déploiement sur Koyeb
+
+**Fichier :** `koyeb.yaml`
+
+```yaml
+name: dpe-streamlit-app
+services:
+  - name: dpe-streamlit
+    type: web
+    ports:
+      - 8501
+    routes:
+      - path: /
+    build_from_source: true
+    dockerfile_path: ./Dockerfile
+    volumes:
+      - name: data-volume
+        mount_path: /app/data
+      - name: models-volume
+        mount_path: /app/models
+    env:
+      - key: STREAMLIT_SERVER_PORT
+        value: "8501"
+      - key: PYTHONUNBUFFERED
+        value: "1"
+```
+
+**Commandes exécutées automatiquement :**
+- Démarrage de FastAPI (`uvicorn api.main:app`)  
+- Lancement de Streamlit (`streamlit run Scripts/app/main.py`)
+
+---
+
+## 5. Maintenance et évolution
+
+| Tâche | Localisation | Description |
+|--------|---------------|--------------|
+| 🔁 Réentraînement | `Notebooks/classification_new.ipynb` & `regression_new.ipynb` | Réentraîner et sauvegarder les nouveaux modèles `.pkl` |
+| 🧹 Rafraîchissement des données | `Notebooks/collect_data_api.ipynb` | Mise à jour depuis l’API ADEME |
+| 🧰 Mise à jour dépendances | `requirements.txt` | `pip install -r requirements.txt` |
+| 🐳 Reconstruction Docker | `Dockerfile` | `docker build -t dpe-app .` |
+| ☁️ Mise à jour sur Koyeb | `koyeb.yaml` | Relancer le déploiement avec `git push` |
+
+---
+
+## 6. Schéma d’architecture
+
+L’illustration ci-dessous représente l’architecture globale du projet.
+
+![Architecture GreenTech Solutions](architecture_greentech.png)
+
+### Description du flux :
+1. L’utilisateur interagit via **Streamlit**
+2. Les requêtes de prédiction sont envoyées à **FastAPI**
+3. FastAPI charge les modèles `.pkl` pour l’inférence
+4. Les résultats sont renvoyés à Streamlit pour affichage
+5. L’application est conteneurisée et déployée sur **Koyeb**
+
+---
+
+## 7. Bonnes pratiques
+- Conserver la cohérence des versions de `scikit-learn` entre entraînement et production.  
+- Vérifier que les volumes `/app/data` et `/app/models` sont bien montés avant chaque déploiement.  
+- Utiliser `joblib` pour sérialiser les modèles et preprocessors.  
+- Sauvegarder les notebooks avant tout réentraînement.  
+
+---
+
+## 8. Références
+- [API ADEME – Données DPE](https://data.ademe.fr/)  
+- [Documentation Streamlit](https://docs.streamlit.io/)  
+- [Documentation FastAPI](https://fastapi.tiangolo.com/)  
+- [Documentation Koyeb](https://www.koyeb.com/docs)  
