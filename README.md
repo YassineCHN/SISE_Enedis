@@ -34,6 +34,7 @@ L’application vise à :
 |------------|--------------|
 | Frontend | **Streamlit** |
 | Backend | **FastAPI** |
+| Stockage (données + modèles) | **HuggingFace** |
 | Modélisation | **Scikit-learn**, **Pandas**, **Joblib** |
 | Visualisation | **Plotly**, **Folium**, **Streamlit Folium** |
 | Données géographiques | **PyProj** (conversion Lambert93 → WGS84) |
@@ -96,7 +97,8 @@ La description complète de l’image Docker publique (`yassinechn/dpe-app`) et 
 ## 📋 Cahier des charges
 
 L’avancement du projet respecte la quasi-totalité des exigences du cahier des charges initial.  
-Les fonctionnalités majeures (exploration, cartographie, prédiction, export, API, Docker) sont **fonctionnelles**.
+Les fonctionnalités majeures (exploration, cartographie, prédiction, export, API, Docker) sont **fonctionnelles**.  
+Les fonctionnalités manquantes sont le réentrainement du modèle et l'enrichissement des données.
 
 ### État d’avancement
 <img width="1334" height="738" alt="image" src="https://github.com/user-attachments/assets/5938b80a-f26a-46dc-981a-e4b3f9be8cf6" />
@@ -108,8 +110,8 @@ Les fonctionnalités majeures (exploration, cartographie, prédiction, export, A
 <img width="1912" height="915" alt="image" src="https://github.com/user-attachments/assets/7a859124-f187-4471-bb29-719721d55a5f" />
 
 
-> Bien que le suivi n’ait pas été exhaustif, le Kanban montre les principales étapes validées :  
-> création du repo, rédaction du rapport, documentation, dockerisation et déploiement.
+> Bien que le suivi n’ait pas été pleinement fait avec Taiga, le Kanban montre les principales étapes validées :  
+> Exemple : création du repo, rédaction du rapport, documentation, dockerisation et déploiement.
 
 ---
 
@@ -146,7 +148,7 @@ SISE_ENEDIS/
 
 ## 👥 Crédits
 
-**Auteur** : Yassine CHENIOUR - Mohamed Habib BAH - Perrine IBOUROI
+**Auteur** : Yassine CHENIOUR - Mohamed Habib BAH - Perrine IBOUROI  
 **Date** : Octobre 2025  
 **Version** : 1.0  
 **Licence** : Usage académique – Master 2 SISE
