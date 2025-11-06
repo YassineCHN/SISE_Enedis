@@ -5,7 +5,7 @@
 **GreenTech Solutions** est une application web interactive combinant **Streamlit** (interface utilisateur) et **FastAPI** (API de prédiction), déployée sur **Koyeb**.  
 Elle permet d’explorer les données du **Diagnostic de Performance Énergétique (DPE)** (ADEME), d’analyser la consommation énergétique des logements et de **prédire la classe DPE et la consommation estimée** d’un logement.
 
-**URL de déploiement :** appstreamlit.koyeb.app
+**URL de déploiement :** [Application Streamlit sur Koyeb](https://appstreamlit.koyeb.app/)  
 **Dépôt GitHub :** https://github.com/YassineCHN/SISE_Enedis
 
 ---
@@ -23,20 +23,23 @@ Elle permet d’explorer les données du **Diagnostic de Performance Énergétiq
 **Fonctionnalités** :
 - Chargement du fichier `donnees_dpe_73_clean.csv`
 - Filtres : code postal, type de bâtiment, période de construction, énergie de chauffage
-- Visualisations interactives (**Plotly**) : histogrammes, barres, scatter, boxplots
-- Export : graphiques **PNG** et données filtrées **CSV**
+- Rafraichir les données (interroge l'API de l'ADEME selon la dernière date_reception_dpe chargé)
+- Statistiques principales sur le jeux de données (dynamique selon les filtres) : Surface moyenne, Conso moyenne, Emission moyenne
+- Export : données filtrées en **CSV**
 
-**Utilisation** : Choisir les filtres (sidebar) → visuels mis à jour en temps réel.
+**Utilisation** : Choisir des filtres et explorer le jeux de données
 
 ---
 
 ### 📈 Analyse Statistique
 **Objectif** : Étudier les relations entre caractéristiques des logements et performances énergétiques.  
 **Fonctionnalités** :
-- Corrélations : énergie ↔ consommation, période ↔ DPE, surface ↔ GES
-- Graphiques Plotly (zoom, survol, export)
+- Statistiques principales des données numériques (téléchargeable en CSV) : count, mean, std, min, q1, q2, q3, max
+- Différents types de visualisations (**Plotly**) : Histogramme/barres empilées, Boxplot, Scatterplot, Piechart
+- Plusieurs possibilités de variables X (et Y pour les types de graphiques concernés) et possibilité d'utiliser une variable de regroupement
+- Visualisations interactives (téléchargeable en png) : Zoomer et dézoomer sur le graphique, affichage d'étiquette en survol, subdiviser une partie du graphique
 
-**Utilisation** : Identifier tendances globales et variables influentes.
+**Utilisation** : Identifier tendances globales et variables influentes. Choisir les filtres (sidebar) → visuels mis à jour en temps réel. Cliquer sur les graphiques pour intéragir.
 
 ---
 
@@ -45,7 +48,7 @@ Elle permet d’explorer les données du **Diagnostic de Performance Énergétiq
 **Fonctionnalités** :
 - Carte **Folium** intégrée à Streamlit
 - Conversion géographique **Lambert93 → WGS84**
-- Filtres : classe DPE, période, type de bâtiment
+- Filtres : étiquette DPE, code postal, type de bâtiment
 - Navigation (zoom, clic) et **export image**
 
 **Utilisation** : Explorer zones performantes vs énergivores.
@@ -55,41 +58,53 @@ Elle permet d’explorer les données du **Diagnostic de Performance Énergétiq
 ### 🤖 Prédiction
 **Objectif** : Simuler **classe DPE (A–G)** et **consommation (kWh/m²/an)**.  
 **Formulaire** :
-- Type (maison/appartement), surface, période/année de construction
-- Énergie de chauffage
-- Logement traversant (Oui/Non), qualité d’isolation
+- Type (maison/appartement), surface, année de construction
+- Énergie principale de chauffage, logement traversant (Oui/Non), Classe d'altitude 
+- Qualité d’isolation des murs, qualité des menuiseries, qualité d'inertie
 
 **Modèles** :
 - **Classification DPE** : Random Forest Classifier  
 - **Régression conso** : Random Forest Regressor
 
 **Résultats** :
-- Classe DPE prédite + badge “Passoire” (F–G)
+- Classe DPE prédite (A <-> G) 
 - Consommation estimée
-- Indication **MaPrimeRénov** (éligibilité simple)
+- Indication **MaPrimeRénov** (éligibilité simple) (E,F,G)
 
 ---
 
-### ⚙️ API
-**Objectif** : Exposer les modèles via **FastAPI**.  
-**Fonctionnalités** :
-- Documentation interactive Swagger : `/docs`
-- Endpoints : `/predict_dpe`, `/predict_conso`
-- Exemple de payload :
-```json
-{
-  "surface_habitable_logement": 85,
-  "type_batiment": "maison",
-  "type_energie_principale_chauffage": "electricite",
-  "periode_construction": "1971 - 1980",
-  "logement_traversant": "non"
-}
-```
+### ⚙️ API – Interface FastAPI
+
+**Objectif** : Exposer les modèles de prédiction à travers une API REST performante et documentée, permettant l’accès aux fonctionnalités de calcul du DPE, de la consommation énergétique et de l’éligibilité à MaPrimeRénov’.  
+
+L’API est construite avec **FastAPI**, intégrée directement à l’application Streamlit, et documentée automatiquement via Swagger (accessible à l’adresse `/docs`).
+
+**🔗 Endpoints disponibles**
+
+| Méthode | Endpoint | Description |
+|----------|-----------|-------------|
+| `GET` | `/status` | Vérifie la disponibilité et l’état du service |
+| `GET` | `/last_update` | Renvoie la dernière date de mise à jour des données DPE |
+| `GET` | `/predict_sample` | Permet une prédiction rapide via les paramètres d’URL |
+| `POST` | `/predict_all` | Exécute une prédiction complète : étiquette DPE, consommation (kWh/m²/an) et éligibilité MaPrimeRénov’ |
+
+**Autres fonctionnalités**
+- Schéma des champs attendus (`POST /predict_all`)
+- Exemple de corps JSON (POST)
+- Outil de requête interactif permettant de tester directement les endpoints de l’API sans ligne de code.  
+
+**⚙️ Fonctionnement global**
+
+1. Les requêtes envoyées par Streamlit sont transmises à **FastAPI** (port `8000`)  
+2. FastAPI charge les modèles `.pkl` hébergés localement ou sur **Hugging Face**  
+3. Les prédictions sont renvoyées au format JSON à Streamlit (port `8501`)  
+4. L’utilisateur visualise les résultats directement dans l’application  
+
 
 ---
 
-### 👤 À propos
-**Contenu** : Liens GitHub, auteurs/roles (chef de projet, dev, data scientist), liens doc technique & rapport d’étude.
+### 👤 Profil
+**Contenu** : Photos des membres de l'équipe + liens vers profils Linkedin.
 
 ---
 
@@ -120,14 +135,12 @@ Elle permet d’explorer les données du **Diagnostic de Performance Énergétiq
 ---
 
 ## Évolutions prévues
-- MAJ automatique des données via API ADEME  
 - Réentraînement des modèles depuis l’interface  
-- Mode “avant/après travaux” (comparaison scénarios)  
-- Profils utilisateurs (sauvegarde scénarios)
+- Enrichissement des données (et des analyses) avec données OpenData
 
 ---
 
-**Auteur** : Yassine CHENIOUR - Mohamed Habib BAH - Perrine IBOUROI
+**Auteur** : Yassine CHENIOUR - Mohamed Habib BAH - Perrine IBOUROI  
 **Date** : Octobre 2025  
 **Version** : 1.0  
 **Licence** : Usage académique – Master 2 SISE
